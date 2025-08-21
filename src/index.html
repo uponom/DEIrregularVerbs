@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>DE Irregular Verbs — Offline Trainer</title>
+<style>
+  :root {
+    --bg: #0b0b0b;
+    --card: #ffffff;
+    --text: #111;
+    --muted: #666;
+    --border: #e5e5e5;
+    --primary: #ffffff;  /* активные кнопки — белые */
+    --inactive: #e5e5e5; /* неактивные — серые */
+    --green: #16a34a;    /* "Дальше" */
+    --gray-btn: #e5e7eb; /* "Озвучить" */
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';
+    background: var(--bg);
+    color: var(--text);
+  }
+  .container { max-width: 920px; margin: 0 auto; padding: clamp(12px, 2.5vw, 24px); padding-bottom: calc(env(safe-area-inset-bottom,0) + 16px); }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .left, .right { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--inactive); }
+  .segmented button { border: 0; background: transparent; padding: 10px 14px; font-weight: 600; cursor: pointer; min-width: 52px; }
+  .segmented button.active { background: var(--primary); }
+  .btn { padding: 10px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--inactive); cursor: pointer; font-weight: 600; }
+  .btn.active { background: var(--primary); }
+  .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
+  .btn-gray { background: var(--gray-btn); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: clamp(14px, 3vw, 18px); box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
+  .label { font-size: 12px; color: var(--muted); }
+  .value-lg { font-size: clamp(28px, 8vw, 48px); line-height: 1.1; }
+  .value-md { font-size: clamp(20px, 6vw, 32px); line-height: 1.15; }
+  .muted { color: var(--muted); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .spacer { height: 8px; }
+  .warn { background: #fff8e1; color: #6b4c00; padding: 10px 12px; border-radius: 12px; border: 1px solid #f3d999; }
+  .options { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  @media (min-width: 560px) { .options { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  @media (min-width: 880px) { .options { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+  .opt { padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: #fff; cursor: pointer; text-align: left; min-height: 44px; }
+  .opt:active { transform: translateY(1px); }
+
+  /* Flashcard layout */
+  .flash { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .line { display: flex; width: 100%; }
+  .left { justify-content: flex-start; }
+  .center { justify-content: center; }
+  .right { justify-content: flex-end; }
+  .invert { color: #fff; background: #000; border-radius: 12px; padding: 10px 12px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="controls">
+    <div class="left">
+      <div class="segmented" id="langGroup">
+        <button data-lang="EN">EN</button>
+        <button data-lang="UA">UA</button>
+        <button data-lang="RU" class="active">RU</button>
+      </div>
+      <label class="row" style="gap:6px;">
+        <input id="ttsToggle" type="checkbox" checked />
+        <span class="label">Озвучка (de-DE)</span>
+      </label>
+    </div>
+    <div class="right">
+      <button id="modeLearn" class="btn active">Обучение</button>
+      <button id="modeQuiz" class="btn">Проверка</button>
+    </div>
+  </div>
+
+  <main id="main"></main>
+</div>
+
+<script>
+// Embedded data (short set)
+const VERBS = [
+  {"Level":"A1","InfChar":"E","Infinitiv":"sehen","P3Char":"I / IE","Praesens3":"sieht","PraetChar":"A","Praeteritum":"sah","P2Char":"E","AuxVerb":"haben","Partizip2":"gesehen","UA":"бачити","RU":"видеть","EN":"see"},
+  {"Level":"A1","InfChar":"E","Infinitiv":"lesen","P3Char":"I / IE","Praesens3":"liest","PraetChar":"A","Praeteritum":"las","P2Char":"E","AuxVerb":"haben","Partizip2":"gelesen","UA":"читати","RU":"читать","EN":"read"},
+  {"Level":"A1","InfChar":"E","Infinitiv":"sprechen","P3Char":"I / IE","Praesens3":"spricht","PraetChar":"A","Praeteritum":"sprach","P2Char":"O","AuxVerb":"haben","Partizip2":"gesprochen","UA":"розмовляти","RU":"разговаривать","EN":"speak"},
+  {"Level":"A1","InfChar":"E","Infinitiv":"nehmen","P3Char":"I / IE","Praesens3":"nimmt","PraetChar":"A","Praeteritum":"nahm","P2Char":"O","AuxVerb":"haben","Partizip2":"genommen","UA":"брати","RU":"брать","EN":"take"},
+  {"Level":"B1","InfChar":"A","Infinitiv":"lassen","P3Char":"Ä","Praesens3":"lässt","PraetChar":"IE","Praeteritum":"ließ","P2Char":"A","AuxVerb":"haben","Partizip2":"gelassen","UA":"дозволяти","RU":"позволять","EN":"let"},
+  {"Level":"B1","InfChar":"A","Infinitiv":"verlassen","P3Char":"Ä","Praesens3":"verlässt","PraetChar":"IE","Praeteritum":"verließ","P2Char":"A","AuxVerb":"haben","Partizip2":"verlassen","UA":"залишати","RU":"оставлять","EN":"leave"},
+  {"Level":"A1","InfChar":"A","Infinitiv":"fahren","P3Char":"Ä","Praesens3":"fährt","PraetChar":"U","Praeteritum":"fuhr","P2Char":"A","AuxVerb":"sein","Partizip2":"gefahren","UA":"їхати","RU":"ехать","EN":"drive"},
+  {"Level":"B1","InfChar":"A","Infinitiv":"schlagen","P3Char":"Ä","Praesens3":null,"PraetChar":"U","Praeteritum":"schlug","P2Char":"A","AuxVerb":"haben","Partizip2":"geschlagen","UA":"вдаряти","RU":"ударять","EN":"hit"},
+  {"Level":"A1","InfChar":"EI","Infinitiv":"bleiben","P3Char":null,"Praesens3":null,"PraetChar":"IE","Praeteritum":"blieb","P2Char":"IE","AuxVerb":"sein","Partizip2":"geblieben","UA":"залишатися","RU":"оставаться","EN":"stay"},
+  {"Level":"B1","InfChar":"EI","Infinitiv":"leihen","P3Char":null,"Praesens3":null,"PraetChar":"IE","Praeteritum":"lieh","P2Char":"IE","AuxVerb":"haben","Partizip2":"geliehen","UA":"позичати","RU":"одалживать","EN":"lend, borrow"}
+];
+
+// I18N (quiz)
+const I18N = {
+  RU: { question: "Вопрос", score: "Счёт", step1: "Инфинитив (DE)", step2: "Präteritum", step3: "Partizip II и вспомогательный", goodDe: "Верно! Теперь выберите Präteritum.", bad: (a)=>`Неверно. Правильно: ${a}`, goodPret: "Отлично! Теперь Partizip II.", goodP2: "Супер! Осталось выбрать вспомогательный глагол.", done: (ok,a)=> ok? "Верно! Вопрос завершён.": `Неверно. Правильно: ${a}` },
+  EN: { question: "Question", score: "Score", step1: "Infinitive (DE)", step2: "Präteritum", step3: "Partizip II & Auxiliary", goodDe: "Correct! Now pick Präteritum.", bad:(a)=>`Incorrect. Correct: ${a}`, goodPret:"Great! Now Partizip II.", goodP2:"Nice! Pick the auxiliary.", done:(ok,a)=> ok? "Correct! Done.": `Incorrect. Correct: ${a}` },
+  UA: { question: "Питання", score: "Рахунок", step1: "Інфінітів (DE)", step2: "Präteritum", step3: "Partizip II та допоміжне", goodDe:"Вірно! Тепер виберіть Präteritum.", bad:(a)=>`Невірно. Правильно: ${a}`, goodPret:"Чудово! Тепер Partizip II.", goodP2:"Супер! Лишилося вибрати допоміжне.", done:(ok,a)=> ok? "Вірно! Готово.": `Невірно. Правильно: ${a}` }
+};
+
+// State
+let STATE = { mode:'learn', uiLang:'RU', tts:true, index:0, voices:[], deVoice:null, score:0, total:0 };
+
+// Utils
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const ITEMS = shuffle(VERBS.map(v=>({ ru:v.RU, ua:v.UA, en:v.EN, de:v.Infinitiv, pras:v.Praesens3, pret:v.Praeteritum, part2:v.Partizip2, aux:v.AuxVerb }))).filter(x=>x.de&&(x.ru||x.ua||x.en));
+function tr(it){ return STATE.uiLang==='RU'? it.ru : STATE.uiLang==='UA'? it.ua : it.en; }
+
+// TTS
+function pickGermanVoice(){
+  try{
+    const list = window.speechSynthesis?.getVoices?.() || [];
+    STATE.voices = list;
+    let v = list.find(v=>/de-DE/i.test(v.lang)) || list.find(v=>/^de[-_]/i.test(v.lang));
+    if(!v){
+      const prefs=[/Microsoft (Katja|Conrad|Stefan)/i,/Google Deutsch/i,/German \(Germany\)/i,/Anna|Petra|Markus|Vicki/i];
+      for(const rx of prefs){ v=list.find(voice=>rx.test(voice.name)); if(v) break; }
+    }
+    STATE.deVoice = v || null;
+  }catch(e){ STATE.deVoice=null; }
+}
+
+function speakSequence(parts){
+  if(!STATE.tts) return;
+  try{
+    if(!('speechSynthesis' in window) || !window.SpeechSynthesisUtterance) return;
+    window.speechSynthesis.cancel();
+    (parts||[]).filter(Boolean).forEach(txt=>{
+      const u=new SpeechSynthesisUtterance(txt);
+      u.lang='de-DE';
+      if(STATE.deVoice) u.voice=STATE.deVoice;
+      u.rate=0.95; u.pitch=1.0;
+      window.speechSynthesis.speak(u);
+    });
+  }catch(e){ /* silent */ }
+}
+
+// Render
+const main = document.getElementById('main');
+function render(){ if(STATE.mode==='learn') renderLearn(); else renderQuiz(); }
+
+function renderLearn(){
+  const it = ITEMS[STATE.index];
+  const root = document.createElement('div');
+  root.className = 'card';
+  root.innerHTML = `
+    <div class="flash">
+      <div class="grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+        <div class="label" style="text-align:left;">Infinitiv/Präsens</div>
+        <div class="label" style="text-align:center;">Präteritum</div>
+        <div class="label" style="text-align:right;">Partizip II</div>
+      </div>
+      <div class="line left"><div class="value-lg">${it.de ?? ''}</div></div>
+      <div class="line left"><div class="value-lg">${it.pras ?? ''}</div></div>
+      <div class="line center"><div class="value-lg">${it.pret ?? ''}</div></div>
+      <div class="line right"><div class="value-lg">${it.part2 ?? ''}</div></div>
+      <div class="line"><div class="invert value-lg" style="width:100%">${tr(it) ?? ''}</div></div>
+    </div>
+    <div class="row" style="margin-top:12px; justify-content: space-between;">
+      <button id="speakBtn" class="btn btn-gray">Озвучить</button>
+      <button id="nextBtn" class="btn btn-green">Дальше →</button>
+    </div>`;
+  main.replaceChildren(root);
+  document.getElementById('speakBtn').onclick = () => speakSequence([it.de, it.pret, it.part2]);
+  document.getElementById('nextBtn').onclick = () => { STATE.index = (STATE.index + 1) % ITEMS.length; render(); };
+  if(STATE.tts){ speakSequence([it.de, it.pret, it.part2]); }
+}
+
+function pickOptions(key, item, count=4){ const pool = ITEMS.filter(x => x[key] && x[key] !== item[key]); const cand = shuffle(pool).slice(0, Math.max(0, count-1)); return shuffle([item, ...cand]).map(it => it[key]); }
+
+function renderQuiz(){
+  const it = ITEMS[STATE.index];
+  const root = document.createElement('div');
+  root.className = 'card';
+  const score = `${I18N[STATE.uiLang].score}: ${STATE.score}/${STATE.total}`;
+  const q = tr(it) ?? '';
+  const deOpts = pickOptions('de', it, 4);
+  const pretOpts = pickOptions('pret', it, 4);
+  const p2Opts = pickOptions('part2', it, 4);
+  const auxOpts = ['haben','sein','—'];
+  root.innerHTML = `
+    <div class="row" style="justify-content: space-between;">
+      <div><div class="label">${I18N[STATE.uiLang].question}</div><div class="value-md">${q}</div></div>
+      <div class="muted">${score}</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="label">${I18N[STATE.uiLang].step1}</div><div class="options" id="optsDe"></div>
+    <div class="spacer"></div>
+    <div class="label">${I18N[STATE.uiLang].step2}</div><div class="options" id="optsPret"></div>
+    <div class="spacer"></div>
+    <div class="label">${I18N[STATE.uiLang].step3}</div><div class="options" id="optsP2"></div><div class="options" id="optsAux"></div>
+    <div class="row" style="margin-top:12px; justify-content: space-between;">
+      <button id="speakQ" class="btn btn-gray">Озвучить</button>
+      <button id="nextQ" class="btn btn-green">Дальше →</button>
+    </div>
+    <div id="feedback" class="spacer"></div>`;
+  main.replaceChildren(root);
+  function add(id, list, key, correct){ const wrap=document.getElementById(id); wrap.innerHTML=''; list.forEach(val=>{ if(!val) return; const b=document.createElement('button'); b.className='opt'; b.textContent=val; b.onclick=()=>{ const ok = val === correct; STATE.total += 1; if(ok) STATE.score += 1; const fb=document.getElementById('feedback'); const T = I18N[STATE.uiLang]; if(key==='de') fb.textContent = ok ? T.goodDe : T.bad(correct); else if(key==='pret') fb.textContent = ok ? T.goodPret : T.bad(correct); else if(key==='part2') fb.textContent = ok ? T.goodP2 : T.bad(correct); else if(key==='aux') fb.textContent = T.done(ok, correct); }; wrap.appendChild(b); }); }
+  add('optsDe', deOpts, 'de', it.de);
+  add('optsPret', pretOpts, 'pret', it.pret);
+  add('optsP2', p2Opts, 'part2', it.part2);
+  add('optsAux', auxOpts, 'aux', it.aux || '—');
+  document.getElementById('speakQ').onclick = () => speakSequence([it.de, it.pret, it.part2]);
+  document.getElementById('nextQ').onclick = () => { STATE.index = (STATE.index + 1) % ITEMS.length; render(); };
+}
+
+// Controls
+const langGroup = document.querySelector('#langGroup');
+langGroup.onclick = (e)=>{ const btn = e.target.closest('button'); if(!btn) return; document.querySelectorAll('#langGroup button').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); STATE.uiLang = btn.getAttribute('data-lang'); render(); };
+document.querySelector('#modeLearn').onclick = ()=>{ STATE.mode='learn'; document.querySelector('#modeLearn').classList.add('active'); document.querySelector('#modeQuiz').classList.remove('active'); render(); };
+document.querySelector('#modeQuiz').onclick = ()=>{ STATE.mode='quiz'; document.querySelector('#modeQuiz').classList.add('active'); document.querySelector('#modeLearn').classList.remove('active'); render(); };
+document.querySelector('#ttsToggle').onchange = (e)=>{ STATE.tts = e.target.checked; render(); };
+
+// Voice
+pickGermanVoice();
+if('speechSynthesis' in window){ try{ window.speechSynthesis.onvoiceschanged = pickGermanVoice; setTimeout(pickGermanVoice, 300); setTimeout(pickGermanVoice, 1200); }catch(e){} }
+
+// Initial render
+render();
+</script>
+</body>
+</html>
