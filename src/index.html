@@ -12,7 +12,7 @@
     --muted: #666;
     --border: #e5e5e5;
     --primary: #ffffff;  /* активные кнопки — белые */
-    --inactive: #9aa0a6; /* неактивные — ТЁМНО-СЕРЫЙ */
+    --inactive: #9aa0a6; /* неактивные — тёмно-серые */
     --green: #16a34a;    /* "Дальше" */
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -40,21 +40,33 @@
   /* Карточка */
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: clamp(14px, 3vw, 18px); box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
   .label { font-size: 12px; color: var(--muted); }
-  .colhdr { font-size: clamp(14px, 2vw, 18px); } /* заголовок карточки в одну строку, немного крупнее */
+  .colhdr { font-size: clamp(14px, 2vw, 18px); } /* заголовок карточки в одну строку, чуть крупнее */
   .value-lg { font-size: clamp(28px, 8vw, 48px); line-height: 1.1; }
   .value-md { font-size: clamp(20px, 6vw, 32px); line-height: 1.15; }
-  .form3 { color: var(--muted); } /* 3 л. ед.ч. серым в скобках */
+  .form3 { color: var(--muted); font-weight: 800; } /* 3 л. ед.ч. серым и жирным (в скобках) */
+  .aux { font-style: italic; margin-right: 6px; }  /* вспом. глагол без скобок, курсивом */
   .muted { color: var(--muted); }
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .spacer { height: 8px; }
 
-  .options { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  /* Кнопки вариантов в проверке */
+  .options { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 8px 0 14px; } /* добавил нижний отступ */
   @media (min-width: 560px) { .options { grid-template-columns: repeat(2, minmax(0,1fr)); } }
   @media (min-width: 880px) { .options { grid-template-columns: repeat(3, minmax(0,1fr)); } }
-  .opt { padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: #fff; cursor: pointer; text-align: left; min-height: 44px; }
+  .opt {
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #f3f4f6;                /* светло-серый фон */
+    cursor: pointer;
+    text-align: left;
+    min-height: 44px;
+    font-size: clamp(18px, 4.5vw, 22px); /* крупнее шрифт */
+    font-weight: 600;
+  }
   .opt:active { transform: translateY(1px); }
-  .opt-wrong { background: #fecaca; border-color: #fca5a5; }
-  .opt-right { background: #bbf7d0; border-color: #86efac; }
+  .opt-wrong { background: #fecaca !important; border-color: #fca5a5 !important; }
+  .opt-right { background: #bbf7d0 !important; border-color: #86efac !important; }
 
   .flash { display: grid; grid-template-columns: 1fr; gap: 8px; }
   .line { display: flex; width: 100%; }
@@ -155,10 +167,10 @@ function renderLearn(){
         <div class="label colhdr" style="text-align:right;">Partizip II</div>
       </div>
       <div class="line left">
-        <div class="value-lg">${it.de ?? ''} <span class="form3">${it.pras ? '(' + it.pras + ')' : ''}</span></div>
+        <div class="value-lg"><strong>${it.de ?? ''}</strong> <span class="form3">(${it.pras ? it.pras : ''})</span></div>
       </div>
-      <div class="line center"><div class="value-lg">${it.pret ?? ''}</div></div>
-      <div class="line right"><div class="value-lg"><span class="form3">${it.aux ? '('+it.aux+') ' : ''}</span>${it.part2 ?? ''}</div></div>
+      <div class="line center"><div class="value-lg"><strong>${it.pret ?? ''}</strong></div></div>
+      <div class="line right"><div class="value-lg"><span class="aux">${it.aux ? it.aux : ''}</span><strong>${it.part2 ?? ''}</strong></div></div>
       <div class="line"><div class="invert value-lg" style="width:100%">${tr(it) ?? ''}</div></div>
     </div>
     <div class="row" style="margin-top:12px; justify-content: flex-end;">
@@ -169,7 +181,7 @@ function renderLearn(){
   if(STATE.tts){ speakSequence([it.de, it.pret, it.part2]); }
 }
 
-/* Вспом: набор 5 случайных + правильный, перемешать */
+/* Уникальные опции: 5 случайных + правильный, перемешать */
 function makeOptions(key, correctItem, count=5) {
   const values = Array.from(new Set(ITEMS.map(x=>x[key]).filter(v => v && v !== correctItem[key])));
   const picks = shuffle(values).slice(0, count);
@@ -179,17 +191,15 @@ function makeOptions(key, correctItem, count=5) {
 
 /* === ПРОВЕРКА === */
 function renderQuiz(){
-  // при входе в вопрос — если нет прогресса, сбросить
   if (!STATE.q) STATE.q = { de:null, pret:null, p2:null };
 
   const it = ITEMS[STATE.index];
   const root = document.createElement('div');
   root.className = 'card';
 
-  // Верхняя строка с переводом (инверсия, без слова "Вопрос")
+  // Верх: перевод инвертированными цветами
   const prompt = `<div class="invert value-lg" style="width:100%; text-align:center;">${tr(it) ?? ''}</div>`;
 
-  // Контейнеры для ответов
   root.innerHTML = `
     <div class="grid" style="gap: 10px;">
       ${prompt}
@@ -218,7 +228,8 @@ function renderQuiz(){
         if (val === it.de) {
           b.classList.add('opt-right');
           STATE.q.de = val;
-          setTimeout(render, 200); // убрать кнопки и показать ответ
+          speakSequence([val]);              // озвучить верный инфинитив
+          setTimeout(render, 200);
         } else {
           b.classList.add('opt-wrong');
         }
@@ -228,7 +239,7 @@ function renderQuiz(){
     ansDe.replaceChildren(wrap);
   }
 
-  // 2) Präteritum — появляется после верного инфинитива
+  // 2) Präteritum — после верного инфинитива
   const ansPret = document.getElementById('ansPret');
   if (STATE.q.de) {
     if (STATE.q.pret) {
@@ -244,6 +255,7 @@ function renderQuiz(){
           if (val === it.pret) {
             b.classList.add('opt-right');
             STATE.q.pret = val;
+            speakSequence([val]);            // озвучить верный Präteritum
             setTimeout(render, 200);
           } else {
             b.classList.add('opt-wrong');
@@ -255,11 +267,11 @@ function renderQuiz(){
     }
   }
 
-  // 3) Partizip II — появляется после верного Präteritum
+  // 3) Partizip II — после верного Präteritum
   const ansP2 = document.getElementById('ansP2');
   if (STATE.q.de && STATE.q.pret) {
     if (STATE.q.p2) {
-      ansP2.innerHTML = `<div class="value-md" style="text-align:left;"><span class="form3">${it.aux ? '('+it.aux+') ' : ''}</span>${STATE.q.p2}</div>`;
+      ansP2.innerHTML = `<div class="value-md" style="text-align:left;"><span class="aux">${it.aux ? it.aux : ''}</span>${STATE.q.p2}</div>`;
     } else {
       const opts = makeOptions('part2', it, 5).filter(Boolean);
       const wrap = document.createElement('div'); wrap.className = 'options';
@@ -271,6 +283,12 @@ function renderQuiz(){
           if (val === it.part2) {
             b.classList.add('opt-right');
             STATE.q.p2 = val;
+            // если все три выбраны — озвучить три формы
+            if (STATE.q.de && STATE.q.pret && val) {
+              speakSequence([it.de, it.pret, it.part2]);
+            } else {
+              speakSequence([val]); // (на всякий случай, но сюда не попадём)
+            }
             setTimeout(render, 200);
           } else {
             b.classList.add('opt-wrong');
@@ -308,8 +326,7 @@ document.querySelector('#modeQuiz').onclick = ()=>{
   STATE.mode='quiz';
   document.querySelector('#modeQuiz').classList.add('active');
   document.querySelector('#modeLearn').classList.remove('active');
-  // сброс прогресса вопроса
-  STATE.q = { de:null, pret:null, p2:null };
+  STATE.q = { de:null, pret:null, p2:null }; // сброс прогресса
   render();
 };
 document.querySelector('#ttsToggle').onchange = (e)=>{ STATE.tts = e.target.checked; render(); };
