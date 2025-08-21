@@ -12,9 +12,8 @@
     --muted: #666;
     --border: #e5e5e5;
     --primary: #ffffff;  /* активные кнопки — белые */
-    --inactive: #e5e5e5; /* неактивные — серые */
+    --inactive: #9aa0a6; /* неактивные — ТЁМНО-СЕРЫЙ */
     --green: #16a34a;    /* "Дальше" */
-    --gray-btn: #e5e7eb; /* "Озвучить" */
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; }
@@ -37,7 +36,6 @@
   .btn { padding: 10px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--inactive); cursor: pointer; font-weight: 600; }
   .btn.active { background: var(--primary); }
   .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
-  .btn-gray { background: var(--gray-btn); }
 
   /* Карточка */
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: clamp(14px, 3vw, 18px); box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
@@ -55,6 +53,8 @@
   @media (min-width: 880px) { .options { grid-template-columns: repeat(3, minmax(0,1fr)); } }
   .opt { padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: #fff; cursor: pointer; text-align: left; min-height: 44px; }
   .opt:active { transform: translateY(1px); }
+  .opt-wrong { background: #fecaca; border-color: #fca5a5; }
+  .opt-right { background: #bbf7d0; border-color: #86efac; }
 
   .flash { display: grid; grid-template-columns: 1fr; gap: 8px; }
   .line { display: flex; width: 100%; }
@@ -88,9 +88,7 @@
 </div>
 
 <script>
-/* ====== ВСТРОЕННЫЕ ДАННЫЕ ======
-   При желании сюда можно вставить ваш полный список.
-   Сейчас — компактный набор для примера (офлайн). */
+/* ====== ДАННЫЕ (пример) ====== */
 const VERBS = [
   {"Level":"A1","InfChar":"E","Infinitiv":"sehen","P3Char":"I / IE","Praesens3":"sieht","PraetChar":"A","Praeteritum":"sah","P2Char":"E","AuxVerb":"haben","Partizip2":"gesehen","UA":"бачити","RU":"видеть","EN":"see"},
   {"Level":"A1","InfChar":"E","Infinitiv":"lesen","P3Char":"I / IE","Praesens3":"liest","PraetChar":"A","Praeteritum":"las","P2Char":"E","AuxVerb":"haben","Partizip2":"gelesen","UA":"читати","RU":"читать","EN":"read"},
@@ -104,22 +102,13 @@ const VERBS = [
   {"Level":"B1","InfChar":"EI","Infinitiv":"leihen","P3Char":null,"Praesens3":null,"PraetChar":"IE","Praeteritum":"lieh","P2Char":"IE","AuxVerb":"haben","Partizip2":"geliehen","UA":"позичати","RU":"одалживать","EN":"lend, borrow"}
 ];
 
-/* ====== I18N (для режима проверки) ====== */
-const I18N = {
-  RU: { question: "Вопрос", score: "Счёт", step1: "Инфинитив (DE)", step2: "Präteritum", step3: "Partizip II и вспомогательный", goodDe: "Верно! Теперь выберите Präteritum.", bad: (a)=>`Неверно. Правильно: ${a}`, goodPret: "Отлично! Теперь Partizip II.", goodP2: "Супер! Осталось выбрать вспомогательный глагол.", done: (ok,a)=> ok? "Верно! Вопрос завершён.": `Неверно. Правильно: ${a}` },
-  EN: { question: "Question", score: "Score", step1: "Infinitive (DE)", step2: "Präteritum", step3: "Partizip II & Auxiliary", goodDe: "Correct! Now pick Präteritum.", bad:(a)=>`Incorrect. Correct: ${a}`, goodPret:"Great! Now Partizip II.", goodP2:"Nice! Pick the auxiliary.", done:(ok,a)=> ok? "Correct! Done.": `Incorrect. Correct: ${a}` },
-  UA: { question: "Питання", score: "Рахунок", step1: "Інфінітів (DE)", step2: "Präteritum", step3: "Partizip II та допоміжне", goodDe:"Вірно! Тепер виберіть Präteritum.", bad:(a)=>`Невірно. Правильно: ${a}`, goodPret:"Чудово! Тепер Partizip II.", goodP2:"Супер! Лишилося вибрати допоміжне.", done:(ok,a)=> ok? "Вірно! Готово.": `Невірно. Правильно: ${a}` }
-};
-
-/* ====== Состояние ====== */
-let STATE = { mode:'learn', uiLang:'RU', tts:true, index:0, voices:[], deVoice:null, score:0, total:0 };
-
-/* ====== Утилиты ====== */
+/* ====== Состояние и утилиты ====== */
+let STATE = { mode:'learn', uiLang:'RU', tts:true, index:0, voices:[], deVoice:null, q:null };
 function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 const ITEMS = shuffle(VERBS.map(v=>({ ru:v.RU, ua:v.UA, en:v.EN, de:v.Infinitiv, pras:v.Praesens3, pret:v.Praeteritum, part2:v.Partizip2, aux:v.AuxVerb }))).filter(x=>x.de&&(x.ru||x.ua||x.en));
 function tr(it){ return STATE.uiLang==='RU'? it.ru : STATE.uiLang==='UA'? it.ua : it.en; }
 
-/* ====== TTS (безопасно офлайн) ====== */
+/* ====== Голоса (офлайн-безопасно) ====== */
 function pickGermanVoice(){
   try{
     const list = window.speechSynthesis?.getVoices?.() || [];
@@ -133,26 +122,27 @@ function pickGermanVoice(){
   }catch(e){ STATE.deVoice=null; }
 }
 
-/* Меньшая пауза: делаем ОДИН utterance и соединяем формы пробелом */
+/* Одна реплика => минимальная пауза */
 function speakSequence(parts){
   if(!STATE.tts) return;
   try{
     if(!('speechSynthesis' in window) || !window.SpeechSynthesisUtterance) return;
+    const text = (parts||[]).filter(Boolean).join(' ');
+    if(!text) return;
     window.speechSynthesis.cancel();
-    const text = (parts||[]).filter(Boolean).join(' '); // минимальная пауза
     const u=new SpeechSynthesisUtterance(text);
     u.lang='de-DE';
     if(STATE.deVoice) u.voice=STATE.deVoice;
     u.rate=0.95; u.pitch=1.0;
     window.speechSynthesis.speak(u);
-  }catch(e){ /* игнорируем */ }
+  }catch(e){ /* ignore */ }
 }
 
 /* ====== Рендер ====== */
 const main = document.getElementById('main');
 function render(){ if(STATE.mode==='learn') renderLearn(); else renderQuiz(); }
 
-/* Карточка обучения */
+/* === ОБУЧЕНИЕ === */
 function renderLearn(){
   const it = ITEMS[STATE.index];
   const root = document.createElement('div');
@@ -168,83 +158,136 @@ function renderLearn(){
         <div class="value-lg">${it.de ?? ''} <span class="form3">${it.pras ? '(' + it.pras + ')' : ''}</span></div>
       </div>
       <div class="line center"><div class="value-lg">${it.pret ?? ''}</div></div>
-      <div class="line right"><div class="value-lg">${it.part2 ?? ''}</div></div>
+      <div class="line right"><div class="value-lg"><span class="form3">${it.aux ? '('+it.aux+') ' : ''}</span>${it.part2 ?? ''}</div></div>
       <div class="line"><div class="invert value-lg" style="width:100%">${tr(it) ?? ''}</div></div>
     </div>
-    <div class="row" style="margin-top:12px; justify-content: space-between;">
-      <button id="speakBtn" class="btn btn-gray">Озвучить</button>
+    <div class="row" style="margin-top:12px; justify-content: flex-end;">
       <button id="nextBtn" class="btn btn-green">Дальше →</button>
     </div>`;
   main.replaceChildren(root);
-  document.getElementById('speakBtn').onclick = () => speakSequence([it.de, it.pret, it.part2]);
   document.getElementById('nextBtn').onclick = () => { STATE.index = (STATE.index + 1) % ITEMS.length; render(); };
-
-  // Авто-озвучка при показе карточки
   if(STATE.tts){ speakSequence([it.de, it.pret, it.part2]); }
 }
 
-/* Вспомогательные для режима проверки */
-function pickOptions(key, item, count=4){
-  const pool = ITEMS.filter(x => x[key] && x[key] !== item[key]);
-  const cand = shuffle(pool).slice(0, Math.max(0, count-1));
-  return shuffle([item, ...cand]).map(it => it[key]);
+/* Вспом: набор 5 случайных + правильный, перемешать */
+function makeOptions(key, correctItem, count=5) {
+  const values = Array.from(new Set(ITEMS.map(x=>x[key]).filter(v => v && v !== correctItem[key])));
+  const picks = shuffle(values).slice(0, count);
+  const all = shuffle([correctItem[key], ...picks]);
+  return all;
 }
 
-/* Режим проверки */
+/* === ПРОВЕРКА === */
 function renderQuiz(){
+  // при входе в вопрос — если нет прогресса, сбросить
+  if (!STATE.q) STATE.q = { de:null, pret:null, p2:null };
+
   const it = ITEMS[STATE.index];
   const root = document.createElement('div');
   root.className = 'card';
-  const score = `${I18N[STATE.uiLang].score}: ${STATE.score}/${STATE.total}`;
-  const q = tr(it) ?? '';
-  const deOpts = pickOptions('de', it, 4);
-  const pretOpts = pickOptions('pret', it, 4);
-  const p2Opts = pickOptions('part2', it, 4);
-  const auxOpts = ['haben','sein','—'];
 
+  // Верхняя строка с переводом (инверсия, без слова "Вопрос")
+  const prompt = `<div class="invert value-lg" style="width:100%; text-align:center;">${tr(it) ?? ''}</div>`;
+
+  // Контейнеры для ответов
   root.innerHTML = `
-    <div class="row" style="justify-content: space-between;">
-      <div><div class="label">${I18N[STATE.uiLang].question}</div><div class="value-md">${q}</div></div>
-      <div class="muted">${score}</div>
+    <div class="grid" style="gap: 10px;">
+      ${prompt}
+      <div id="ansDe"></div>
+      <div id="ansPret"></div>
+      <div id="ansP2"></div>
+      <div class="row" style="margin-top:4px; justify-content: flex-end;">
+        <button id="nextQ" class="btn btn-green">Дальше →</button>
+      </div>
     </div>
-    <div class="spacer"></div>
-    <div class="label">${I18N[STATE.uiLang].step1}</div><div class="options" id="optsDe"></div>
-    <div class="spacer"></div>
-    <div class="label">${I18N[STATE.uiLang].step2}</div><div class="options" id="optsPret"></div>
-    <div class="spacer"></div>
-    <div class="label">${I18N[STATE.uiLang].step3}</div><div class="options" id="optsP2"></div><div class="options" id="optsAux"></div>
-    <div class="row" style="margin-top:12px; justify-content: space-between;">
-      <button id="speakQ" class="btn btn-gray">Озвучить</button>
-      <button id="nextQ" class="btn btn-green">Дальше →</button>
-    </div>
-    <div id="feedback" class="spacer"></div>`;
+  `;
   main.replaceChildren(root);
 
-  function add(id, list, key, correct){
-    const wrap=document.getElementById(id); wrap.innerHTML='';
-    list.forEach(val=>{
-      if(!val) return;
-      const b=document.createElement('button'); b.className='opt'; b.textContent=val;
-      b.onclick=()=>{
-        const ok = val === correct;
-        STATE.total += 1; if(ok) STATE.score += 1;
-        const fb=document.getElementById('feedback');
-        const T = I18N[STATE.uiLang];
-        if(key==='de') fb.textContent = ok ? T.goodDe : T.bad(correct);
-        else if(key==='pret') fb.textContent = ok ? T.goodPret : T.bad(correct);
-        else if(key==='part2') fb.textContent = ok ? T.goodP2 : T.bad(correct);
-        else if(key==='aux') fb.textContent = T.done(ok, correct);
+  // 1) Инфинитив
+  const ansDe = document.getElementById('ansDe');
+  if (STATE.q.de) {
+    ansDe.innerHTML = `<div class="value-md" style="text-align:left;">${STATE.q.de}</div>`;
+  } else {
+    const opts = makeOptions('de', it, 5);
+    const wrap = document.createElement('div'); wrap.className = 'options';
+    opts.forEach(val => {
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.textContent = val;
+      b.onclick = () => {
+        if (val === it.de) {
+          b.classList.add('opt-right');
+          STATE.q.de = val;
+          setTimeout(render, 200); // убрать кнопки и показать ответ
+        } else {
+          b.classList.add('opt-wrong');
+        }
       };
       wrap.appendChild(b);
     });
+    ansDe.replaceChildren(wrap);
   }
-  add('optsDe', deOpts, 'de', it.de);
-  add('optsPret', pretOpts, 'pret', it.pret);
-  add('optsP2', p2Opts, 'part2', it.part2);
-  add('optsAux', auxOpts, 'aux', it.aux || '—');
 
-  document.getElementById('speakQ').onclick = () => speakSequence([it.de, it.pret, it.part2]);
-  document.getElementById('nextQ').onclick = () => { STATE.index = (STATE.index + 1) % ITEMS.length; render(); };
+  // 2) Präteritum — появляется после верного инфинитива
+  const ansPret = document.getElementById('ansPret');
+  if (STATE.q.de) {
+    if (STATE.q.pret) {
+      ansPret.innerHTML = `<div class="value-md" style="text-align:left;">${STATE.q.pret}</div>`;
+    } else {
+      const opts = makeOptions('pret', it, 5).filter(Boolean);
+      const wrap = document.createElement('div'); wrap.className = 'options';
+      opts.forEach(val => {
+        const b = document.createElement('button');
+        b.className = 'opt';
+        b.textContent = val;
+        b.onclick = () => {
+          if (val === it.pret) {
+            b.classList.add('opt-right');
+            STATE.q.pret = val;
+            setTimeout(render, 200);
+          } else {
+            b.classList.add('opt-wrong');
+          }
+        };
+        wrap.appendChild(b);
+      });
+      ansPret.replaceChildren(wrap);
+    }
+  }
+
+  // 3) Partizip II — появляется после верного Präteritum
+  const ansP2 = document.getElementById('ansP2');
+  if (STATE.q.de && STATE.q.pret) {
+    if (STATE.q.p2) {
+      ansP2.innerHTML = `<div class="value-md" style="text-align:left;"><span class="form3">${it.aux ? '('+it.aux+') ' : ''}</span>${STATE.q.p2}</div>`;
+    } else {
+      const opts = makeOptions('part2', it, 5).filter(Boolean);
+      const wrap = document.createElement('div'); wrap.className = 'options';
+      opts.forEach(val => {
+        const b = document.createElement('button');
+        b.className = 'opt';
+        b.textContent = val;
+        b.onclick = () => {
+          if (val === it.part2) {
+            b.classList.add('opt-right');
+            STATE.q.p2 = val;
+            setTimeout(render, 200);
+          } else {
+            b.classList.add('opt-wrong');
+          }
+        };
+        wrap.appendChild(b);
+      });
+      ansP2.replaceChildren(wrap);
+    }
+  }
+
+  // Next
+  document.getElementById('nextQ').onclick = () => {
+    STATE.index = (STATE.index + 1) % ITEMS.length;
+    STATE.q = { de:null, pret:null, p2:null };
+    render();
+  };
 }
 
 /* ====== Обработчики ====== */
@@ -265,6 +308,8 @@ document.querySelector('#modeQuiz').onclick = ()=>{
   STATE.mode='quiz';
   document.querySelector('#modeQuiz').classList.add('active');
   document.querySelector('#modeLearn').classList.remove('active');
+  // сброс прогресса вопроса
+  STATE.q = { de:null, pret:null, p2:null };
   render();
 };
 document.querySelector('#ttsToggle').onchange = (e)=>{ STATE.tts = e.target.checked; render(); };
