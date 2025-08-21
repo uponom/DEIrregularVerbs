@@ -40,17 +40,17 @@
   /* Карточка */
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: clamp(14px, 3vw, 18px); box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
   .label { font-size: 12px; color: var(--muted); }
-  .colhdr { font-size: clamp(14px, 2vw, 18px); } /* заголовок карточки в одну строку, чуть крупнее */
+  .colhdr { font-size: clamp(14px, 2vw, 18px); }
   .value-lg { font-size: clamp(28px, 8vw, 48px); line-height: 1.1; }
   .value-md { font-size: clamp(20px, 6vw, 32px); line-height: 1.15; }
-  .form3 { color: var(--muted); font-weight: 800; } /* 3 л. ед.ч. серым и жирным (в скобках) */
-  .aux { font-style: italic; margin-right: 6px; }  /* вспом. глагол без скобок, курсивом */
+  .form3 { color: var(--muted); font-weight: 400; } /* 3 л. ед.ч. обычным, серым */
+  .aux { color: var(--muted); font-style: italic; margin-right: 6px; } /* haben/sein всегда серым, курсив */
   .muted { color: var(--muted); }
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .spacer { height: 8px; }
 
-  /* Кнопки вариантов в проверке */
-  .options { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 8px 0 14px; } /* добавил нижний отступ */
+  /* Кнопки вариантов (Проверка) */
+  .options { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 8px 0 14px; }
   @media (min-width: 560px) { .options { grid-template-columns: repeat(2, minmax(0,1fr)); } }
   @media (min-width: 880px) { .options { grid-template-columns: repeat(3, minmax(0,1fr)); } }
   .opt {
@@ -61,12 +61,14 @@
     cursor: pointer;
     text-align: left;
     min-height: 44px;
-    font-size: clamp(18px, 4.5vw, 22px); /* крупнее шрифт */
-    font-weight: 600;
+    font-size: clamp(28px, 8vw, 48px);  /* как у слова-подсказки */
+    font-weight: 700;                   /* крупно и жирно */
   }
   .opt:active { transform: translateY(1px); }
   .opt-wrong { background: #fecaca !important; border-color: #fca5a5 !important; }
   .opt-right { background: #bbf7d0 !important; border-color: #86efac !important; }
+
+  .step-label { color: var(--muted); font-size: clamp(14px, 4vw, 24px); } /* вдвое меньше шрифта кнопок */
 
   .flash { display: grid; grid-template-columns: 1fr; gap: 8px; }
   .line { display: flex; width: 100%; }
@@ -107,7 +109,7 @@ const VERBS = [
   {"Level":"A1","InfChar":"E","Infinitiv":"sprechen","P3Char":"I / IE","Praesens3":"spricht","PraetChar":"A","Praeteritum":"sprach","P2Char":"O","AuxVerb":"haben","Partizip2":"gesprochen","UA":"розмовляти","RU":"разговаривать","EN":"speak"},
   {"Level":"A1","InfChar":"E","Infinitiv":"nehmen","P3Char":"I / IE","Praesens3":"nimmt","PraetChar":"A","Praeteritum":"nahm","P2Char":"O","AuxVerb":"haben","Partizip2":"genommen","UA":"брати","RU":"брать","EN":"take"},
   {"Level":"B1","InfChar":"A","Infinitiv":"lassen","P3Char":"Ä","Praesens3":"lässt","PraetChar":"IE","Praeteritum":"ließ","P2Char":"A","AuxVerb":"haben","Partizip2":"gelassen","UA":"дозволяти","RU":"позволять","EN":"let"},
-  {"Level":"B1","InfChar":"A","Infinitiv":"verlassen","P3Char":"Ä","Praesens3":"verlässt","PraetChar":"IE","Praeteritum":"verließ","P2Char":"A","AuxVerb":"haben","Partizip2":"verlassen","UA":"залишати","RU":"оставлять","EN":"leave"},
+  {"Level":"B1","InfChar":"A","Infinitiv":"verlassen","P3Char":"Ä","Praesens3":"verlässt","PraetChar":"IE","Praeteritum":"верließ","P2Char":"A","AuxVerb":"haben","Partizip2":"verlassen","UA":"залишати","RU":"оставлять","EN":"leave"},
   {"Level":"A1","InfChar":"A","Infinitiv":"fahren","P3Char":"Ä","Praesens3":"fährt","PraetChar":"U","Praeteritum":"fuhr","P2Char":"A","AuxVerb":"sein","Partizip2":"gefahren","UA":"їхати","RU":"ехать","EN":"drive"},
   {"Level":"B1","InfChar":"A","Infinitiv":"schlagen","P3Char":"Ä","Praesens3":null,"PraetChar":"U","Praeteritum":"schlug","P2Char":"A","AuxVerb":"haben","Partizip2":"geschlagen","UA":"вдаряти","RU":"ударять","EN":"hit"},
   {"Level":"A1","InfChar":"EI","Infinitiv":"bleiben","P3Char":null,"Praesens3":null,"PraetChar":"IE","Praeteritum":"blieb","P2Char":"IE","AuxVerb":"sein","Partizip2":"geblieben","UA":"залишатися","RU":"оставаться","EN":"stay"},
@@ -167,7 +169,7 @@ function renderLearn(){
         <div class="label colhdr" style="text-align:right;">Partizip II</div>
       </div>
       <div class="line left">
-        <div class="value-lg"><strong>${it.de ?? ''}</strong> <span class="form3">(${it.pras ? it.pras : ''})</span></div>
+        <div class="value-lg"><strong>${it.de ?? ''}</strong> <span class="form3">${it.pras ? '(' + it.pras + ')' : ''}</span></div>
       </div>
       <div class="line center"><div class="value-lg"><strong>${it.pret ?? ''}</strong></div></div>
       <div class="line right"><div class="value-lg"><span class="aux">${it.aux ? it.aux : ''}</span><strong>${it.part2 ?? ''}</strong></div></div>
@@ -216,10 +218,12 @@ function renderQuiz(){
   // 1) Инфинитив
   const ansDe = document.getElementById('ansDe');
   if (STATE.q.de) {
-    ansDe.innerHTML = `<div class="value-md" style="text-align:left;">${STATE.q.de}</div>`;
+    ansDe.innerHTML = `<div class="value-md" style="text-align:left;"><strong>${STATE.q.de}</strong></div>`;
   } else {
     const opts = makeOptions('de', it, 5);
-    const wrap = document.createElement('div'); wrap.className = 'options';
+    const wrap = document.createElement('div');
+    const label = document.createElement('div'); label.className = 'step-label'; label.textContent = 'Infinitiv';
+    wrap.className = 'options';
     opts.forEach(val => {
       const b = document.createElement('button');
       b.className = 'opt';
@@ -236,17 +240,19 @@ function renderQuiz(){
       };
       wrap.appendChild(b);
     });
-    ansDe.replaceChildren(wrap);
+    ansDe.replaceChildren(label, wrap);
   }
 
   // 2) Präteritum — после верного инфинитива
   const ansPret = document.getElementById('ansPret');
   if (STATE.q.de) {
     if (STATE.q.pret) {
-      ansPret.innerHTML = `<div class="value-md" style="text-align:left;">${STATE.q.pret}</div>`;
+      ansPret.innerHTML = `<div class="value-md" style="text-align:left;"><strong>${STATE.q.pret}</strong></div>`;
     } else {
       const opts = makeOptions('pret', it, 5).filter(Boolean);
-      const wrap = document.createElement('div'); wrap.className = 'options';
+      const wrap = document.createElement('div');
+      const label = document.createElement('div'); label.className = 'step-label'; label.textContent = 'Präteritum';
+      wrap.className = 'options';
       opts.forEach(val => {
         const b = document.createElement('button');
         b.className = 'opt';
@@ -263,7 +269,7 @@ function renderQuiz(){
         };
         wrap.appendChild(b);
       });
-      ansPret.replaceChildren(wrap);
+      ansPret.replaceChildren(label, wrap);
     }
   }
 
@@ -271,10 +277,12 @@ function renderQuiz(){
   const ansP2 = document.getElementById('ansP2');
   if (STATE.q.de && STATE.q.pret) {
     if (STATE.q.p2) {
-      ansP2.innerHTML = `<div class="value-md" style="text-align:left;"><span class="aux">${it.aux ? it.aux : ''}</span>${STATE.q.p2}</div>`;
+      ansP2.innerHTML = `<div class="value-md" style="text-align:left;"><span class="aux">${it.aux ? it.aux + ' ' : ''}</span><strong>${STATE.q.p2}</strong></div>`;
     } else {
       const opts = makeOptions('part2', it, 5).filter(Boolean);
-      const wrap = document.createElement('div'); wrap.className = 'options';
+      const wrap = document.createElement('div');
+      const label = document.createElement('div'); label.className = 'step-label'; label.textContent = 'Partizip II';
+      wrap.className = 'options';
       opts.forEach(val => {
         const b = document.createElement('button');
         b.className = 'opt';
@@ -283,12 +291,8 @@ function renderQuiz(){
           if (val === it.part2) {
             b.classList.add('opt-right');
             STATE.q.p2 = val;
-            // если все три выбраны — озвучить три формы
-            if (STATE.q.de && STATE.q.pret && val) {
-              speakSequence([it.de, it.pret, it.part2]);
-            } else {
-              speakSequence([val]); // (на всякий случай, но сюда не попадём)
-            }
+            // все три формы выбраны — озвучить три слова
+            speakSequence([it.de, it.pret, it.part2]);
             setTimeout(render, 200);
           } else {
             b.classList.add('opt-wrong');
@@ -296,7 +300,7 @@ function renderQuiz(){
         };
         wrap.appendChild(b);
       });
-      ansP2.replaceChildren(wrap);
+      ansP2.replaceChildren(label, wrap);
     }
   }
 
