@@ -43,11 +43,12 @@
   .colhdr { font-size: clamp(14px, 2vw, 18px); }
   .value-lg { font-size: clamp(28px, 8vw, 48px); line-height: 1.1; }
   .value-md { font-size: clamp(20px, 6vw, 32px); line-height: 1.15; }
-  .form3 { color: var(--muted); font-weight: 400; } /* 3 л. ед.ч. обычным, серым */
+  .form3 { color: var(--muted); font-weight: 400; } /* 3 л. ед.ч. обычным, серым; без пустых скобок */
   .aux { color: var(--muted); font-style: italic; margin-right: 6px; } /* haben/sein всегда серым, курсив */
   .muted { color: var(--muted); }
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .spacer { height: 8px; }
+  .gap-block { height: 16px; } /* пустая строка между блоками в Проверке */
 
   /* Кнопки вариантов (Проверка) */
   .options { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 8px 0 14px; }
@@ -62,13 +63,13 @@
     text-align: left;
     min-height: 44px;
     font-size: clamp(28px, 8vw, 48px);  /* как у слова-подсказки */
-    font-weight: 700;                   /* крупно и жирно */
+    font-weight: 400;                   /* обычный шрифт */
   }
   .opt:active { transform: translateY(1px); }
   .opt-wrong { background: #fecaca !important; border-color: #fca5a5 !important; }
   .opt-right { background: #bbf7d0 !important; border-color: #86efac !important; }
 
-  .step-label { color: var(--muted); font-size: clamp(14px, 4vw, 24px); } /* вдвое меньше шрифта кнопок */
+  .step-label { color: var(--muted); font-size: clamp(14px, 4vw, 24px); } /* ~в 2 раза меньше шрифта кнопок */
 
   .flash { display: grid; grid-template-columns: 1fr; gap: 8px; }
   .line { display: flex; width: 100%; }
@@ -109,7 +110,7 @@ const VERBS = [
   {"Level":"A1","InfChar":"E","Infinitiv":"sprechen","P3Char":"I / IE","Praesens3":"spricht","PraetChar":"A","Praeteritum":"sprach","P2Char":"O","AuxVerb":"haben","Partizip2":"gesprochen","UA":"розмовляти","RU":"разговаривать","EN":"speak"},
   {"Level":"A1","InfChar":"E","Infinitiv":"nehmen","P3Char":"I / IE","Praesens3":"nimmt","PraetChar":"A","Praeteritum":"nahm","P2Char":"O","AuxVerb":"haben","Partizip2":"genommen","UA":"брати","RU":"брать","EN":"take"},
   {"Level":"B1","InfChar":"A","Infinitiv":"lassen","P3Char":"Ä","Praesens3":"lässt","PraetChar":"IE","Praeteritum":"ließ","P2Char":"A","AuxVerb":"haben","Partizip2":"gelassen","UA":"дозволяти","RU":"позволять","EN":"let"},
-  {"Level":"B1","InfChar":"A","Infinitiv":"verlassen","P3Char":"Ä","Praesens3":"verlässt","PraetChar":"IE","Praeteritum":"верließ","P2Char":"A","AuxVerb":"haben","Partizip2":"verlassen","UA":"залишати","RU":"оставлять","EN":"leave"},
+  {"Level":"B1","InfChar":"A","Infinitiv":"verlassen","P3Char":"Ä","Praesens3":"verlässt","PraetChar":"IE","Praeteritum":"verließ","P2Char":"A","AuxVerb":"haben","Partizip2":"verlassen","UA":"залишати","RU":"оставлять","EN":"leave"},
   {"Level":"A1","InfChar":"A","Infinitiv":"fahren","P3Char":"Ä","Praesens3":"fährt","PraetChar":"U","Praeteritum":"fuhr","P2Char":"A","AuxVerb":"sein","Partizip2":"gefahren","UA":"їхати","RU":"ехать","EN":"drive"},
   {"Level":"B1","InfChar":"A","Infinitiv":"schlagen","P3Char":"Ä","Praesens3":null,"PraetChar":"U","Praeteritum":"schlug","P2Char":"A","AuxVerb":"haben","Partizip2":"geschlagen","UA":"вдаряти","RU":"ударять","EN":"hit"},
   {"Level":"A1","InfChar":"EI","Infinitiv":"bleiben","P3Char":null,"Praesens3":null,"PraetChar":"IE","Praeteritum":"blieb","P2Char":"IE","AuxVerb":"sein","Partizip2":"geblieben","UA":"залишатися","RU":"оставаться","EN":"stay"},
@@ -215,10 +216,12 @@ function renderQuiz(){
   `;
   main.replaceChildren(root);
 
+  function gap() { const d=document.createElement('div'); d.className='gap-block'; return d; }
+
   // 1) Инфинитив
   const ansDe = document.getElementById('ansDe');
   if (STATE.q.de) {
-    ansDe.innerHTML = `<div class="value-md" style="text-align:left;"><strong>${STATE.q.de}</strong></div>`;
+    ansDe.innerHTML = `<div class="value-lg" style="text-align:left;"><strong>${STATE.q.de}</strong></div>`;
   } else {
     const opts = makeOptions('de', it, 5);
     const wrap = document.createElement('div');
@@ -240,14 +243,14 @@ function renderQuiz(){
       };
       wrap.appendChild(b);
     });
-    ansDe.replaceChildren(label, wrap);
+    ansDe.replaceChildren(gap(), label, wrap); // пустая строка над заголовком
   }
 
   // 2) Präteritum — после верного инфинитива
   const ansPret = document.getElementById('ansPret');
   if (STATE.q.de) {
     if (STATE.q.pret) {
-      ansPret.innerHTML = `<div class="value-md" style="text-align:left;"><strong>${STATE.q.pret}</strong></div>`;
+      ansPret.innerHTML = `<div class="value-lg" style="text-align:left;"><strong>${STATE.q.pret}</strong></div>`;
     } else {
       const opts = makeOptions('pret', it, 5).filter(Boolean);
       const wrap = document.createElement('div');
@@ -269,7 +272,7 @@ function renderQuiz(){
         };
         wrap.appendChild(b);
       });
-      ansPret.replaceChildren(label, wrap);
+      ansPret.replaceChildren(gap(), label, wrap);
     }
   }
 
@@ -277,7 +280,7 @@ function renderQuiz(){
   const ansP2 = document.getElementById('ansP2');
   if (STATE.q.de && STATE.q.pret) {
     if (STATE.q.p2) {
-      ansP2.innerHTML = `<div class="value-md" style="text-align:left;"><span class="aux">${it.aux ? it.aux + ' ' : ''}</span><strong>${STATE.q.p2}</strong></div>`;
+      ansP2.innerHTML = `<div class="value-lg" style="text-align:left;"><span class="aux">${it.aux ? it.aux + ' ' : ''}</span><strong>${STATE.q.p2}</strong></div>`;
     } else {
       const opts = makeOptions('part2', it, 5).filter(Boolean);
       const wrap = document.createElement('div');
@@ -300,7 +303,7 @@ function renderQuiz(){
         };
         wrap.appendChild(b);
       });
-      ansP2.replaceChildren(label, wrap);
+      ansP2.replaceChildren(gap(), label, wrap);
     }
   }
 
