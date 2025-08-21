@@ -43,7 +43,7 @@
   .colhdr { font-size: clamp(14px, 2vw, 18px); }
   .value-lg { font-size: clamp(28px, 8vw, 48px); line-height: 1.1; }
   .value-md { font-size: clamp(20px, 6vw, 32px); line-height: 1.15; }
-  .form3 { color: var(--muted); font-weight: 400; } /* 3 л. ед.ч. обычным, серым; без пустых скобок */
+  .form3 { color: var(--muted); font-weight: 400; } /* 3 л. ед.ч. обычным, серым */
   .aux { color: var(--muted); font-style: italic; margin-right: 6px; } /* haben/sein всегда серым, курсив */
   .muted { color: var(--muted); }
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -77,6 +77,10 @@
   .center { justify-content: center; }
   .right { justify-content: flex-end; }
   .invert { color: #fff; background: #000; border-radius: 12px; padding: 10px 12px; text-align: center; }
+
+  /* Низ страницы: инфо о TTS */
+  .tts-info { max-width: 920px; margin: 10px auto 24px; padding: 0 16px; }
+  .tts-info .tiny { color: var(--muted); font-size: 12px; text-align: center; }
 </style>
 </head>
 <body>
@@ -89,7 +93,7 @@
         <button data-lang="RU" class="active">RU</button>
       </div>
       <label class="row" style="gap:6px;">
-        <input id="ttsToggle" type="checkbox" checked />
+        <input id="ttsToggle" type="checkbox" />
         <span class="label">Озвучка (de-DE)</span>
       </label>
     </div>
@@ -101,6 +105,9 @@
 
   <main id="main"></main>
 </div>
+
+<!-- Информация о текущем TTS -->
+<div class="tts-info"><div id="ttsInfo" class="tiny">TTS: —</div></div>
 
 <script>
 /* ====== ДАННЫЕ (пример) ====== */
@@ -118,7 +125,7 @@ const VERBS = [
 ];
 
 /* ====== Состояние и утилиты ====== */
-let STATE = { mode:'learn', uiLang:'RU', tts:true, index:0, voices:[], deVoice:null, q:null };
+let STATE = { mode:'learn', uiLang:'RU', tts:false, index:0, voices:[], deVoice:null, q:null };
 function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 const ITEMS = shuffle(VERBS.map(v=>({ ru:v.RU, ua:v.UA, en:v.EN, de:v.Infinitiv, pras:v.Praesens3, pret:v.Praeteritum, part2:v.Partizip2, aux:v.AuxVerb }))).filter(x=>x.de&&(x.ru||x.ua||x.en));
 function tr(it){ return STATE.uiLang==='RU'? it.ru : STATE.uiLang==='UA'? it.ua : it.en; }
@@ -135,9 +142,11 @@ function pickGermanVoice(){
     }
     STATE.deVoice = v || null;
   }catch(e){ STATE.deVoice=null; }
+  renderTtsInfo();
 }
 
 /* Одна реплика => минимальная пауза */
+const TTS_RATE = 0.95, TTS_PITCH = 1.0;
 function speakSequence(parts){
   if(!STATE.tts) return;
   try{
@@ -148,9 +157,24 @@ function speakSequence(parts){
     const u=new SpeechSynthesisUtterance(text);
     u.lang='de-DE';
     if(STATE.deVoice) u.voice=STATE.deVoice;
-    u.rate=0.95; u.pitch=1.0;
+    u.rate=TTS_RATE; u.pitch=TTS_PITCH;
     window.speechSynthesis.speak(u);
   }catch(e){ /* ignore */ }
+}
+
+/* ====== Информация о TTS внизу страницы ====== */
+function renderTtsInfo(){
+  const el = document.getElementById('ttsInfo');
+  const haveAPI = 'speechSynthesis' in window && window.SpeechSynthesisUtterance;
+  const voice = STATE.deVoice;
+  const parts = [
+    `Движок: ${haveAPI ? 'Web Speech API' : '—'}`,
+    `Включено: ${STATE.tts ? 'да' : 'нет'}`,
+    `Голос: ${voice ? (voice.name + ' (' + (voice.lang||'') + ')') : '—'}`,
+    `Скорость: ${TTS_RATE}`,
+    `Тембр: ${TTS_PITCH}`
+  ];
+  el.textContent = parts.join(' · ');
 }
 
 /* ====== Рендер ====== */
@@ -170,7 +194,7 @@ function renderLearn(){
         <div class="label colhdr" style="text-align:right;">Partizip II</div>
       </div>
       <div class="line left">
-        <div class="value-lg"><strong>${it.de ?? ''}</strong> <span class="form3">${it.pras ? '(' + it.pras + ')' : ''}</span></div>
+        <div class="value-lg"><strong>${it.de ?? ''}</strong> ${it.pras ? `<span class="form3">(${it.pras})</span>` : ''}</div>
       </div>
       <div class="line center"><div class="value-lg"><strong>${it.pret ?? ''}</strong></div></div>
       <div class="line right"><div class="value-lg"><span class="aux">${it.aux ? it.aux : ''}</span><strong>${it.part2 ?? ''}</strong></div></div>
@@ -184,12 +208,15 @@ function renderLearn(){
   if(STATE.tts){ speakSequence([it.de, it.pret, it.part2]); }
 }
 
-/* Уникальные опции: 5 случайных + правильный, перемешать */
-function makeOptions(key, correctItem, count=5) {
-  const values = Array.from(new Set(ITEMS.map(x=>x[key]).filter(v => v && v !== correctItem[key])));
-  const picks = shuffle(values).slice(0, count);
-  const all = shuffle([correctItem[key], ...picks]);
-  return all;
+/* Умные опции: сперва с той же буквы, потом любые (всего 5+1) */
+function makeSmartOptions(key, correctItem, count=5) {
+  const correct = correctItem[key];
+  const allVals = Array.from(new Set(ITEMS.map(x=>x[key]).filter(v => v && v !== correct)));
+  const first = (correct || '').charAt(0).toLowerCase();
+  const same = allVals.filter(v => v.charAt(0).toLowerCase() === first);
+  const rest = allVals.filter(v => v.charAt(0).toLowerCase() !== first);
+  const picks = [...shuffle(same).slice(0, count), ...shuffle(rest)].slice(0, count);
+  return shuffle([correct, ...picks]);
 }
 
 /* === ПРОВЕРКА === */
@@ -221,9 +248,9 @@ function renderQuiz(){
   // 1) Инфинитив
   const ansDe = document.getElementById('ansDe');
   if (STATE.q.de) {
-    ansDe.innerHTML = `<div class="value-lg" style="text-align:left;"><strong>${STATE.q.de}</strong></div>`;
+    ansDe.innerHTML = `<div class="value-lg" style="text-align:center;"><strong>${STATE.q.de}</strong></div>`;
   } else {
-    const opts = makeOptions('de', it, 5);
+    const opts = makeSmartOptions('de', it, 5);
     const wrap = document.createElement('div');
     const label = document.createElement('div'); label.className = 'step-label'; label.textContent = 'Infinitiv';
     wrap.className = 'options';
@@ -243,16 +270,16 @@ function renderQuiz(){
       };
       wrap.appendChild(b);
     });
-    ansDe.replaceChildren(gap(), label, wrap); // пустая строка над заголовком
+    ansDe.replaceChildren(gap(), label, wrap);
   }
 
   // 2) Präteritum — после верного инфинитива
   const ansPret = document.getElementById('ansPret');
   if (STATE.q.de) {
     if (STATE.q.pret) {
-      ansPret.innerHTML = `<div class="value-lg" style="text-align:left;"><strong>${STATE.q.pret}</strong></div>`;
+      ansPret.innerHTML = `<div class="value-lg" style="text-align:center;"><strong>${STATE.q.pret}</strong></div>`;
     } else {
-      const opts = makeOptions('pret', it, 5).filter(Boolean);
+      const opts = makeSmartOptions('pret', it, 5).filter(Boolean);
       const wrap = document.createElement('div');
       const label = document.createElement('div'); label.className = 'step-label'; label.textContent = 'Präteritum';
       wrap.className = 'options';
@@ -280,9 +307,9 @@ function renderQuiz(){
   const ansP2 = document.getElementById('ansP2');
   if (STATE.q.de && STATE.q.pret) {
     if (STATE.q.p2) {
-      ansP2.innerHTML = `<div class="value-lg" style="text-align:left;"><span class="aux">${it.aux ? it.aux + ' ' : ''}</span><strong>${STATE.q.p2}</strong></div>`;
+      ansP2.innerHTML = `<div class="value-lg" style="text-align:center;"><span class="aux">${it.aux ? it.aux + ' ' : ''}</span><strong>${STATE.q.p2}</strong></div>`;
     } else {
-      const opts = makeOptions('part2', it, 5).filter(Boolean);
+      const opts = makeSmartOptions('part2', it, 5).filter(Boolean);
       const wrap = document.createElement('div');
       const label = document.createElement('div'); label.className = 'step-label'; label.textContent = 'Partizip II';
       wrap.className = 'options';
@@ -336,7 +363,7 @@ document.querySelector('#modeQuiz').onclick = ()=>{
   STATE.q = { de:null, pret:null, p2:null }; // сброс прогресса
   render();
 };
-document.querySelector('#ttsToggle').onchange = (e)=>{ STATE.tts = e.target.checked; render(); };
+document.querySelector('#ttsToggle').onchange = (e)=>{ STATE.tts = e.target.checked; renderTtsInfo(); render(); };
 
 /* ====== Голоса ====== */
 pickGermanVoice();
@@ -349,6 +376,7 @@ if('speechSynthesis' in window){
 }
 
 /* ====== Старт ====== */
+renderTtsInfo();
 render();
 </script>
 </body>
