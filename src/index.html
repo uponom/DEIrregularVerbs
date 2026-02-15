@@ -11,9 +11,9 @@
     --text: #111;
     --muted: #666;
     --border: #e5e5e5;
-    --primary: #ffffff;  /* активные кнопки — белые */
-    --inactive: #9aa0a6; /* неактивные — тёмно-серые */
-    --green: #16a34a;    /* "Дальше" */
+    --primary: #ffffff;  /* active buttons */
+    --inactive: #9aa0a6; /* inactive buttons */
+    --green: #16a34a;    /* "Next" button */
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; }
@@ -27,30 +27,30 @@
   .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
   .left, .right { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
-  /* Языковой переключатель — сегментированные кнопки */
+  /* Language switcher: segmented buttons */
   .segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--inactive); }
   .segmented button { border: 0; background: transparent; padding: 10px 14px; font-weight: 600; cursor: pointer; min-width: 52px; }
   .segmented button.active { background: var(--primary); }
 
-  /* Кнопки режимов */
+  /* Mode buttons */
   .btn { padding: 10px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--inactive); cursor: pointer; font-weight: 600; }
   .btn.active { background: var(--primary); }
   .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
 
-  /* Карточка */
+  /* Card */
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: clamp(14px, 3vw, 18px); box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
   .label { font-size: 12px; color: var(--muted); }
   .colhdr { font-size: clamp(14px, 2vw, 18px); }
   .value-lg { font-size: clamp(28px, 8vw, 48px); line-height: 1.1; }
   .value-md { font-size: clamp(20px, 6vw, 32px); line-height: 1.15; }
-  .form3 { color: var(--muted); font-weight: 400; } /* 3 л. ед.ч. обычным, серым */
-  .aux { color: var(--muted); font-style: italic; margin-right: 6px; } /* haben/sein всегда серым, курсив */
+  .form3 { color: var(--muted); font-weight: 400; } /* 3rd person singular in muted regular style */
+  .aux { color: var(--muted); font-style: italic; margin-right: 6px; } /* haben/sein always muted and italic */
   .muted { color: var(--muted); }
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .spacer { height: 8px; }
-  .gap-block { height: 16px; } /* пустая строка между блоками в Проверке */
+  .gap-block { height: 16px; } /* empty row between quiz blocks */
 
-  /* Кнопки вариантов (Проверка) */
+  /* Quiz option buttons */
   .options { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 8px 0 14px; }
   @media (min-width: 560px) { .options { grid-template-columns: repeat(2, minmax(0,1fr)); } }
   @media (min-width: 880px) { .options { grid-template-columns: repeat(3, minmax(0,1fr)); } }
@@ -58,18 +58,18 @@
     padding: 12px 14px;
     border: 1px solid var(--border);
     border-radius: 12px;
-    background: #f3f4f6;                /* светло-серый фон */
+    background: #f3f4f6;                /* light gray background */
     cursor: pointer;
     text-align: left;
     min-height: 44px;
-    font-size: clamp(28px, 8vw, 48px);  /* как у слова-подсказки */
-    font-weight: 400;                   /* обычный шрифт */
+    font-size: clamp(28px, 8vw, 48px);  /* same size as the prompt word */
+    font-weight: 400;                   /* regular weight */
   }
   .opt:active { transform: translateY(1px); }
   .opt-wrong { background: #fecaca !important; border-color: #fca5a5 !important; }
   .opt-right { background: #bbf7d0 !important; border-color: #86efac !important; }
 
-  .step-label { color: var(--muted); font-size: clamp(14px, 4vw, 24px); } /* ~в 2 раза меньше шрифта кнопок */
+  .step-label { color: var(--muted); font-size: clamp(14px, 4vw, 24px); } /* around 2x smaller than option text */
 
   .flash { display: grid; grid-template-columns: 1fr; gap: 8px; }
   .line { display: flex; width: 100%; }
@@ -78,7 +78,7 @@
   .right { justify-content: flex-end; }
   .invert { color: #fff; background: #000; border-radius: 12px; padding: 10px 12px; text-align: center; }
 
-  /* Низ страницы: инфо о TTS */
+  /* Bottom section: TTS info */
   .tts-info { max-width: 920px; margin: 10px auto 24px; padding: 0 16px; }
   .tts-info .tiny { color: var(--muted); font-size: 12px; text-align: center; }
 </style>
@@ -106,23 +106,10 @@
   <main id="main"></main>
 </div>
 
-<!-- Информация о текущем TTS -->
+<!-- Current TTS info -->
 <div class="tts-info"><div id="ttsInfo" class="tiny">TTS: —</div></div>
 
 <script>
-/* ====== ДАННЫЕ (пример) ====== */
-// const VERBS = [
-//   {"Level":"A1","InfChar":"E","Infinitiv":"sehen","P3Char":"I / IE","Praesens3":"sieht","PraetChar":"A","Praeteritum":"sah","P2Char":"E","AuxVerb":"haben","Partizip2":"gesehen","UA":"бачити","RU":"видеть","EN":"see"},
-//   {"Level":"A1","InfChar":"E","Infinitiv":"lesen","P3Char":"I / IE","Praesens3":"liest","PraetChar":"A","Praeteritum":"las","P2Char":"E","AuxVerb":"haben","Partizip2":"gelesen","UA":"читати","RU":"читать","EN":"read"},
-//   {"Level":"A1","InfChar":"E","Infinitiv":"sprechen","P3Char":"I / IE","Praesens3":"spricht","PraetChar":"A","Praeteritum":"sprach","P2Char":"O","AuxVerb":"haben","Partizip2":"gesprochen","UA":"розмовляти","RU":"разговаривать","EN":"speak"},
-//   {"Level":"A1","InfChar":"E","Infinitiv":"nehmen","P3Char":"I / IE","Praesens3":"nimmt","PraetChar":"A","Praeteritum":"nahm","P2Char":"O","AuxVerb":"haben","Partizip2":"genommen","UA":"брати","RU":"брать","EN":"take"},
-//   {"Level":"B1","InfChar":"A","Infinitiv":"lassen","P3Char":"Ä","Praesens3":"lässt","PraetChar":"IE","Praeteritum":"ließ","P2Char":"A","AuxVerb":"haben","Partizip2":"gelassen","UA":"дозволяти","RU":"позволять","EN":"let"},
-//   {"Level":"B1","InfChar":"A","Infinitiv":"verlassen","P3Char":"Ä","Praesens3":"verlässt","PraetChar":"IE","Praeteritum":"verließ","P2Char":"A","AuxVerb":"haben","Partizip2":"verlassen","UA":"залишати","RU":"оставлять","EN":"leave"},
-//   {"Level":"A1","InfChar":"A","Infinitiv":"fahren","P3Char":"Ä","Praesens3":"fährt","PraetChar":"U","Praeteritum":"fuhr","P2Char":"A","AuxVerb":"sein","Partizip2":"gefahren","UA":"їхати","RU":"ехать","EN":"drive"},
-//   {"Level":"B1","InfChar":"A","Infinitiv":"schlagen","P3Char":"Ä","Praesens3":null,"PraetChar":"U","Praeteritum":"schlug","P2Char":"A","AuxVerb":"haben","Partizip2":"geschlagen","UA":"вдаряти","RU":"ударять","EN":"hit"},
-//   {"Level":"A1","InfChar":"EI","Infinitiv":"bleiben","P3Char":null,"Praesens3":null,"PraetChar":"IE","Praeteritum":"blieb","P2Char":"IE","AuxVerb":"sein","Partizip2":"geblieben","UA":"залишатися","RU":"оставаться","EN":"stay"},
-//   {"Level":"B1","InfChar":"EI","Infinitiv":"leihen","P3Char":null,"Praesens3":null,"PraetChar":"IE","Praeteritum":"lieh","P2Char":"IE","AuxVerb":"haben","Partizip2":"geliehen","UA":"позичати","RU":"одалживать","EN":"lend, borrow"}
-// ];
 const VERBS = [
   { "Level": "A1", "InfChar": "E", "Infinitiv": "sehen", "P3Char": "I / IE", "Praesens3": "sieht", "PraetChar": "A", "Praeteritum": "sah", "P2Char": "E", "AuxVerb": "haben", "Partizip2": "gesehen", "UA": "бачити", "RU": "видеть", "EN": "see" },
   { "Level": "A1", "InfChar": "E", "Infinitiv": "lesen", "P3Char": "I / IE", "Praesens3": "liest", "PraetChar": "A", "Praeteritum": "las", "P2Char": "E", "AuxVerb": "haben", "Partizip2": "gelesen", "UA": "читати", "RU": "читать", "EN": "read" },
@@ -213,13 +200,13 @@ const VERBS = [
 ];
 
 
-/* ====== Состояние и утилиты ====== */
+/* ====== State and helpers ====== */
 let STATE = { mode:'learn', uiLang:'RU', tts:false, index:0, voices:[], deVoice:null, q:null };
 function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 const ITEMS = shuffle(VERBS.map(v=>({ ru:v.RU, ua:v.UA, en:v.EN, de:v.Infinitiv, pras:v.Praesens3, pret:v.Praeteritum, part2:v.Partizip2, aux:v.AuxVerb }))).filter(x=>x.de&&(x.ru||x.ua||x.en));
 function tr(it){ return STATE.uiLang==='RU'? it.ru : STATE.uiLang==='UA'? it.ua : it.en; }
 
-/* ====== Голоса (офлайн-безопасно) ====== */
+/* ====== Voice handling (offline-safe) ====== */
 function pickGermanVoice(){
   try{
     const list = window.speechSynthesis?.getVoices?.() || [];
@@ -234,7 +221,7 @@ function pickGermanVoice(){
   renderTtsInfo();
 }
 
-/* Одна реплика => минимальная пауза */
+/* Single utterance for minimal pauses */
 const TTS_RATE = 0.95, TTS_PITCH = 1.0;
 function speakSequence(parts){
   if(!STATE.tts) return;
@@ -251,7 +238,7 @@ function speakSequence(parts){
   }catch(e){ /* ignore */ }
 }
 
-/* ====== Информация о TTS внизу страницы ====== */
+/* ====== TTS info at the bottom ====== */
 function renderTtsInfo(){
   const el = document.getElementById('ttsInfo');
   const haveAPI = 'speechSynthesis' in window && window.SpeechSynthesisUtterance;
@@ -266,11 +253,11 @@ function renderTtsInfo(){
   el.textContent = parts.join(' · ');
 }
 
-/* ====== Рендер ====== */
+/* ====== Rendering ====== */
 const main = document.getElementById('main');
 function render(){ if(STATE.mode==='learn') renderLearn(); else renderQuiz(); }
 
-/* === ОБУЧЕНИЕ === */
+/* === LEARN MODE === */
 function renderLearn(){
   const it = ITEMS[STATE.index];
   const root = document.createElement('div');
@@ -297,7 +284,7 @@ function renderLearn(){
   if(STATE.tts){ speakSequence([it.de, it.pret, it.part2]); }
 }
 
-/* Умные опции: сперва с той же буквы, потом любые (всего 5+1) */
+/* Smart options: prefer same first letter, then any others (5+1 total) */
 function makeSmartOptions(key, correctItem, count=5) {
   const correct = correctItem[key];
   const allVals = Array.from(new Set(ITEMS.map(x=>x[key]).filter(v => v && v !== correct)));
@@ -308,7 +295,7 @@ function makeSmartOptions(key, correctItem, count=5) {
   return shuffle([correct, ...picks]);
 }
 
-/* === ПРОВЕРКА === */
+/* === QUIZ MODE === */
 function renderQuiz(){
   if (!STATE.q) STATE.q = { de:null, pret:null, p2:null };
 
@@ -316,7 +303,7 @@ function renderQuiz(){
   const root = document.createElement('div');
   root.className = 'card';
 
-  // Верх: перевод инвертированными цветами
+  // Top prompt: translation with inverted colors
   const prompt = `<div class="invert value-lg" style="width:100%; text-align:center;">${tr(it) ?? ''}</div>`;
 
   root.innerHTML = `
@@ -334,7 +321,7 @@ function renderQuiz(){
 
   function gap() { const d=document.createElement('div'); d.className='gap-block'; return d; }
 
-  // 1) Инфинитив
+  // 1) Infinitive
   const ansDe = document.getElementById('ansDe');
   if (STATE.q.de) {
     ansDe.innerHTML = `<div class="value-lg" style="text-align:center;"><strong>${STATE.q.de}</strong></div>`;
@@ -351,7 +338,7 @@ function renderQuiz(){
         if (val === it.de) {
           b.classList.add('opt-right');
           STATE.q.de = val;
-          speakSequence([val]);              // озвучить верный инфинитив
+          speakSequence([val]);              // speak the correct infinitive
           setTimeout(render, 200);
         } else {
           b.classList.add('opt-wrong');
@@ -362,7 +349,7 @@ function renderQuiz(){
     ansDe.replaceChildren(gap(), label, wrap);
   }
 
-  // 2) Präteritum — после верного инфинитива
+  // 2) Präteritum after a correct infinitive
   const ansPret = document.getElementById('ansPret');
   if (STATE.q.de) {
     if (STATE.q.pret) {
@@ -380,7 +367,7 @@ function renderQuiz(){
           if (val === it.pret) {
             b.classList.add('opt-right');
             STATE.q.pret = val;
-            speakSequence([val]);            // озвучить верный Präteritum
+            speakSequence([val]);            // speak the correct Präteritum
             setTimeout(render, 200);
           } else {
             b.classList.add('opt-wrong');
@@ -392,7 +379,7 @@ function renderQuiz(){
     }
   }
 
-  // 3) Partizip II — после верного Präteritum
+  // 3) Partizip II after a correct Präteritum
   const ansP2 = document.getElementById('ansP2');
   if (STATE.q.de && STATE.q.pret) {
     if (STATE.q.p2) {
@@ -410,7 +397,7 @@ function renderQuiz(){
           if (val === it.part2) {
             b.classList.add('opt-right');
             STATE.q.p2 = val;
-            // все три формы выбраны — озвучить три слова
+            // all three forms are selected: speak all three
             speakSequence([it.de, it.pret, it.part2]);
             setTimeout(render, 200);
           } else {
@@ -431,7 +418,7 @@ function renderQuiz(){
   };
 }
 
-/* ====== Обработчики ====== */
+/* ====== Event handlers ====== */
 document.querySelector('#langGroup').onclick = (e)=>{
   const btn = e.target.closest('button'); if(!btn) return;
   document.querySelectorAll('#langGroup button').forEach(b=>b.classList.remove('active'));
@@ -449,12 +436,12 @@ document.querySelector('#modeQuiz').onclick = ()=>{
   STATE.mode='quiz';
   document.querySelector('#modeQuiz').classList.add('active');
   document.querySelector('#modeLearn').classList.remove('active');
-  STATE.q = { de:null, pret:null, p2:null }; // сброс прогресса
+  STATE.q = { de:null, pret:null, p2:null }; // reset quiz progress
   render();
 };
 document.querySelector('#ttsToggle').onchange = (e)=>{ STATE.tts = e.target.checked; renderTtsInfo(); render(); };
 
-/* ====== Голоса ====== */
+/* ====== Voice init ====== */
 pickGermanVoice();
 if('speechSynthesis' in window){
   try{
@@ -464,7 +451,7 @@ if('speechSynthesis' in window){
   }catch(e){}
 }
 
-/* ====== Старт ====== */
+/* ====== App start ====== */
 renderTtsInfo();
 render();
 </script>
