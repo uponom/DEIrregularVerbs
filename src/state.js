@@ -1,15 +1,27 @@
+export const ACTIONS = {
+  NEXT_ITEM: 'NEXT_ITEM',
+  NEXT_ITEM_AND_RESET_QUIZ: 'NEXT_ITEM_AND_RESET_QUIZ',
+  SET_MODE: 'SET_MODE',
+  SET_UI_LANG: 'SET_UI_LANG',
+  SET_TTS: 'SET_TTS',
+  QUIZ_RESET: 'QUIZ_RESET',
+  QUIZ_SET_DE: 'QUIZ_SET_DE',
+  QUIZ_SET_PRET: 'QUIZ_SET_PRET',
+  QUIZ_SET_P2: 'QUIZ_SET_P2',
+};
+
+export function createQuizProgress() {
+  return { de: null, pret: null, p2: null };
+}
+
 export function createInitialState() {
   return {
     mode: 'learn',
     uiLang: 'RU',
     tts: false,
     index: 0,
-    q: null,
+    q: createQuizProgress(),
   };
-}
-
-export function createQuizProgress() {
-  return { de: null, pret: null, p2: null };
 }
 
 export function shuffle(arr) {
@@ -38,27 +50,88 @@ export function createItems(rawVerbs, normalizer) {
 }
 
 export function translate(item, uiLang) {
-  if (uiLang === 'UA') return item.ua;
-  if (uiLang === 'EN') return item.en;
-  return item.ru;
+  if (uiLang === 'UA') return item.ua || item.ru || item.en || '';
+  if (uiLang === 'EN') return item.en || item.ru || item.ua || '';
+  return item.ru || item.ua || item.en || '';
 }
 
-export function advanceIndex(state, itemsLength) {
-  if (!itemsLength) return;
-  state.index = (state.index + 1) % itemsLength;
-}
+export function reduceState(state, action, context) {
+  const currentState = state || createInitialState();
+  const itemsLength = Number.isInteger(context?.itemsLength) ? context.itemsLength : 0;
 
-export function setMode(state, mode) {
-  state.mode = mode;
-  if (mode === 'quiz') {
-    state.q = createQuizProgress();
+  if (!action || typeof action !== 'object') {
+    return currentState;
+  }
+
+  switch (action.type) {
+    case ACTIONS.NEXT_ITEM:
+      if (!itemsLength) return currentState;
+      return {
+        ...currentState,
+        index: (currentState.index + 1) % itemsLength,
+      };
+    case ACTIONS.NEXT_ITEM_AND_RESET_QUIZ:
+      if (!itemsLength) return { ...currentState, q: createQuizProgress() };
+      return {
+        ...currentState,
+        index: (currentState.index + 1) % itemsLength,
+        q: createQuizProgress(),
+      };
+    case ACTIONS.SET_MODE:
+      return {
+        ...currentState,
+        mode: action.value === 'quiz' ? 'quiz' : 'learn',
+        q: action.value === 'quiz' ? createQuizProgress() : currentState.q,
+      };
+    case ACTIONS.SET_UI_LANG:
+      return {
+        ...currentState,
+        uiLang: action.value || 'RU',
+      };
+    case ACTIONS.SET_TTS:
+      return {
+        ...currentState,
+        tts: Boolean(action.value),
+      };
+    case ACTIONS.QUIZ_RESET:
+      return {
+        ...currentState,
+        q: createQuizProgress(),
+      };
+    case ACTIONS.QUIZ_SET_DE:
+      return {
+        ...currentState,
+        q: { ...currentState.q, de: action.value || null },
+      };
+    case ACTIONS.QUIZ_SET_PRET:
+      return {
+        ...currentState,
+        q: { ...currentState.q, pret: action.value || null },
+      };
+    case ACTIONS.QUIZ_SET_P2:
+      return {
+        ...currentState,
+        q: { ...currentState.q, p2: action.value || null },
+      };
+    default:
+      return currentState;
   }
 }
 
-export function setUiLang(state, uiLang) {
-  state.uiLang = uiLang;
-}
+export function createStore(initialState, contextProvider) {
+  let state = initialState;
 
-export function setTts(state, enabled) {
-  state.tts = Boolean(enabled);
+  function getState() {
+    return state;
+  }
+
+  function dispatch(action) {
+    state = reduceState(state, action, contextProvider ? contextProvider() : {});
+    return state;
+  }
+
+  return {
+    dispatch,
+    getState,
+  };
 }

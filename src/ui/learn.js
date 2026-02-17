@@ -1,24 +1,68 @@
-export function renderLearn(main, item, translation, onNext) {
-  const root = document.createElement('div');
-  root.className = 'card';
-  root.innerHTML = `
-    <div class="flash">
-      <div class="line" style="justify-content: space-between;">
-        <div class="label colhdr" style="text-align:left;">Infinitiv/Präsens</div>
-        <div class="label colhdr" style="text-align:center;">Präteritum</div>
-        <div class="label colhdr" style="text-align:right;">Partizip II</div>
-      </div>
-      <div class="line left">
-        <div class="value-lg"><strong>${item.de ?? ''}</strong> ${item.pras ? `<span class="form3">(${item.pras})</span>` : ''}</div>
-      </div>
-      <div class="line center"><div class="value-lg"><strong>${item.pret ?? ''}</strong></div></div>
-      <div class="line right"><div class="value-lg"><span class="aux">${item.aux || ''}</span><strong>${item.part2 ?? ''}</strong></div></div>
-      <div class="line"><div class="invert value-lg" style="width:100%">${translation ?? ''}</div></div>
-    </div>
-    <div class="row" style="margin-top:12px; justify-content: flex-end;">
-      <button id="nextBtn" class="btn btn-green">Дальше →</button>
-    </div>`;
+function createElement(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
 
-  main.replaceChildren(root);
-  document.getElementById('nextBtn').onclick = onNext;
+export function renderLearn(main, params) {
+  const { item, translation, labels, fallback, onNext } = params;
+
+  const card = createElement('section', 'card');
+  const flash = createElement('div', 'flash-grid');
+  card.appendChild(flash);
+
+  const headerRow = createElement('div', 'forms-header');
+  headerRow.appendChild(createElement('div', 'label colhdr', labels.headers.infPras));
+  headerRow.appendChild(createElement('div', 'label colhdr forms-header-center', labels.headers.pret));
+  headerRow.appendChild(createElement('div', 'label colhdr forms-header-right', labels.headers.part2));
+  flash.appendChild(headerRow);
+
+  const infLine = createElement('div', 'forms-line forms-line-left');
+  const infValue = createElement('div', 'value-lg');
+  const infStrong = createElement('strong', '', item.de || fallback);
+  infValue.appendChild(infStrong);
+  if (item.pras) {
+    infValue.appendChild(document.createTextNode(' '));
+    const present = createElement('span', 'form3', `(${item.pras})`);
+    infValue.appendChild(present);
+  }
+  infLine.appendChild(infValue);
+  flash.appendChild(infLine);
+
+  const pretLine = createElement('div', 'forms-line forms-line-center');
+  const pretValue = createElement('div', 'value-lg');
+  pretValue.appendChild(createElement('strong', '', item.pret || fallback));
+  pretLine.appendChild(pretValue);
+  flash.appendChild(pretLine);
+
+  const partLine = createElement('div', 'forms-line forms-line-right');
+  const partValue = createElement('div', 'value-lg');
+  partValue.appendChild(createElement('span', 'aux', `${item.aux || fallback} `));
+  partValue.appendChild(createElement('strong', '', item.part2 || fallback));
+  partLine.appendChild(partValue);
+  flash.appendChild(partLine);
+
+  const translationLine = createElement('div', 'forms-line');
+  const translationValue = createElement('div', 'invert value-lg full-width');
+  translationValue.textContent = translation || fallback;
+  translationLine.appendChild(translationValue);
+  flash.appendChild(translationLine);
+
+  const actions = createElement('div', 'actions actions-right');
+  const nextButton = createElement('button', 'btn btn-green', labels.next);
+  nextButton.id = 'nextBtn';
+  nextButton.type = 'button';
+  nextButton.onclick = onNext;
+  actions.appendChild(nextButton);
+  card.appendChild(actions);
+
+  main.replaceChildren(card);
+}
+
+export function renderEmptyState(main, labels) {
+  const card = createElement('section', 'card empty-state');
+  card.appendChild(createElement('h2', 'empty-title', labels.empty.title));
+  card.appendChild(createElement('p', 'empty-body', labels.empty.body));
+  main.replaceChildren(card);
 }

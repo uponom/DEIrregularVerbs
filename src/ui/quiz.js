@@ -1,32 +1,46 @@
-export function makeSmartOptions(items, key, correctItem, count = 5, shuffleFn) {
-  const correct = correctItem[key];
-  const allVals = Array.from(new Set(items.map((x) => x[key]).filter((v) => v && v !== correct)));
-  const first = (correct || '').charAt(0).toLowerCase();
-  const same = allVals.filter((v) => v.charAt(0).toLowerCase() === first);
-  const rest = allVals.filter((v) => v.charAt(0).toLowerCase() !== first);
-  const picks = [...shuffleFn(same).slice(0, count), ...shuffleFn(rest)].slice(0, count);
-  return shuffleFn([correct, ...picks]);
+function createElement(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
 }
 
-function makeGap() {
-  const gap = document.createElement('div');
-  gap.className = 'gap-block';
-  return gap;
+function getQuizLogic() {
+  if (window.QuizLogic) return window.QuizLogic;
+  return {
+    makeSmartOptions: () => [],
+  };
+}
+
+function addFeedback(button, resultText, isCorrect) {
+  if (button.getAttribute('data-feedback') === 'true') return;
+  const marker = isCorrect ? '✓' : '✗';
+  const suffix = createElement('span', 'feedback-text', ` ${marker} ${resultText}`);
+  button.appendChild(suffix);
+  button.setAttribute('aria-label', `${button.textContent.trim()} ${resultText}`);
+  button.setAttribute('data-feedback', 'true');
 }
 
 function createOptions(values, onPick) {
-  const wrap = document.createElement('div');
-  wrap.className = 'options';
-
+  const wrap = createElement('div', 'quiz-options');
   values.forEach((value) => {
-    const button = document.createElement('button');
-    button.className = 'opt';
-    button.textContent = value;
+    const button = createElement('button', 'opt', value);
+    button.type = 'button';
     button.onclick = () => onPick(value, button);
     wrap.appendChild(button);
   });
-
   return wrap;
+}
+
+function createStep(labelText, optionsNode) {
+  const step = createElement('section', 'quiz-step');
+  step.appendChild(createElement('div', 'step-label', labelText));
+  step.appendChild(optionsNode);
+  return step;
+}
+
+export function makeSmartOptions(items, key, correctItem, count, shuffleFn) {
+  return getQuizLogic().makeSmartOptions(items, key, correctItem, count, shuffleFn);
 }
 
 export function renderQuiz(main, params) {
@@ -34,91 +48,96 @@ export function renderQuiz(main, params) {
     item,
     translation,
     quizState,
-    setQuizState,
-    rerender,
+    labels,
+    fallback,
+    feedbackLabels,
+    onPickDe,
+    onPickPret,
+    onPickP2,
     onNextItem,
-    onSpeak,
     getOptions,
   } = params;
 
-  const root = document.createElement('div');
-  root.className = 'card';
-  root.innerHTML = `
-    <div class="grid" style="gap: 10px;">
-      <div class="invert value-lg" style="width:100%; text-align:center;">${translation ?? ''}</div>
-      <div id="ansDe"></div>
-      <div id="ansPret"></div>
-      <div id="ansP2"></div>
-      <div class="row" style="margin-top:4px; justify-content: flex-end;">
-        <button id="nextQ" class="btn btn-green">Дальше →</button>
-      </div>
-    </div>
-  `;
-  main.replaceChildren(root);
+  const card = createElement('section', 'card');
+  const quizLayout = createElement('div', 'quiz-layout');
+  card.appendChild(quizLayout);
 
-  const ansDe = document.getElementById('ansDe');
+  const prompt = createElement('div', 'invert value-lg full-width quiz-prompt', translation || fallback);
+  prompt.setAttribute('aria-live', 'polite');
+  quizLayout.appendChild(prompt);
+
+  const answerDe = createElement('div', 'quiz-answer');
   if (quizState.de) {
-    ansDe.innerHTML = `<div class="value-lg" style="text-align:center;"><strong>${quizState.de}</strong></div>`;
+    const selected = createElement('div', 'value-lg answer-value');
+    selected.appendChild(createElement('strong', '', quizState.de));
+    answerDe.appendChild(selected);
   } else {
-    const label = document.createElement('div');
-    label.className = 'step-label';
-    label.textContent = 'Infinitiv';
     const options = createOptions(getOptions('de', item), (value, button) => {
       if (value === item.de) {
         button.classList.add('opt-right');
-        setQuizState({ ...quizState, de: value });
-        onSpeak([value]);
-        setTimeout(rerender, 200);
+        addFeedback(button, feedbackLabels.correct, true);
+        onPickDe(value);
       } else {
         button.classList.add('opt-wrong');
+        addFeedback(button, feedbackLabels.wrong, false);
       }
     });
-    ansDe.replaceChildren(makeGap(), label, options);
+    answerDe.appendChild(createStep(labels.quiz.inf, options));
   }
+  quizLayout.appendChild(answerDe);
 
-  const ansPret = document.getElementById('ansPret');
+  const answerPret = createElement('div', 'quiz-answer');
   if (quizState.de) {
     if (quizState.pret) {
-      ansPret.innerHTML = `<div class="value-lg" style="text-align:center;"><strong>${quizState.pret}</strong></div>`;
-    } else {
-      const label = document.createElement('div');
-      label.className = 'step-label';
-      label.textContent = 'Präteritum';
+      const selected = createElement('div', 'value-lg answer-value');
+      selected.appendChild(createElement('strong', '', quizState.pret));
+      answerPret.appendChild(selected);
+    } else if (item.pret) {
       const options = createOptions(getOptions('pret', item).filter(Boolean), (value, button) => {
         if (value === item.pret) {
           button.classList.add('opt-right');
-          setQuizState({ ...quizState, pret: value });
-          onSpeak([value]);
-          setTimeout(rerender, 200);
+          addFeedback(button, feedbackLabels.correct, true);
+          onPickPret(value);
         } else {
           button.classList.add('opt-wrong');
+          addFeedback(button, feedbackLabels.wrong, false);
         }
       });
-      ansPret.replaceChildren(makeGap(), label, options);
+      answerPret.appendChild(createStep(labels.quiz.pret, options));
     }
   }
+  quizLayout.appendChild(answerPret);
 
-  const ansP2 = document.getElementById('ansP2');
+  const answerPart2 = createElement('div', 'quiz-answer');
   if (quizState.de && quizState.pret) {
     if (quizState.p2) {
-      ansP2.innerHTML = `<div class="value-lg" style="text-align:center;"><span class="aux">${item.aux ? `${item.aux} ` : ''}</span><strong>${quizState.p2}</strong></div>`;
-    } else {
-      const label = document.createElement('div');
-      label.className = 'step-label';
-      label.textContent = 'Partizip II';
+      const selected = createElement('div', 'value-lg answer-value');
+      selected.appendChild(createElement('span', 'aux', item.aux ? `${item.aux} ` : ''));
+      selected.appendChild(createElement('strong', '', quizState.p2));
+      answerPart2.appendChild(selected);
+    } else if (item.part2) {
       const options = createOptions(getOptions('part2', item).filter(Boolean), (value, button) => {
         if (value === item.part2) {
           button.classList.add('opt-right');
-          setQuizState({ ...quizState, p2: value });
-          onSpeak([item.de, item.pret, item.part2]);
-          setTimeout(rerender, 200);
+          addFeedback(button, feedbackLabels.correct, true);
+          onPickP2(value);
         } else {
           button.classList.add('opt-wrong');
+          addFeedback(button, feedbackLabels.wrong, false);
         }
       });
-      ansP2.replaceChildren(makeGap(), label, options);
+      answerPart2.appendChild(createStep(labels.quiz.part2, options));
     }
   }
+  quizLayout.appendChild(answerPart2);
 
-  document.getElementById('nextQ').onclick = onNextItem;
+  const actions = createElement('div', 'actions actions-right');
+  const nextButton = createElement('button', 'btn btn-green', labels.next);
+  nextButton.id = 'nextQ';
+  nextButton.type = 'button';
+  nextButton.onclick = onNextItem;
+  actions.appendChild(nextButton);
+  quizLayout.appendChild(actions);
+
+  main.replaceChildren(card);
 }

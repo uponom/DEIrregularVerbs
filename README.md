@@ -7,7 +7,10 @@ A single-page Progressive Web App (PWA) for learning German irregular verbs.
 - `Learn` mode: shows `Infinitiv`, `Präteritum`, `Partizip II`, and translation.
 - `Quiz` mode: step-by-step form selection from multiple options.
 - Translation languages: `RU`, `UA`, `EN`.
+- Full UI localization for `RU`, `UA`, `EN` (controls, quiz labels, status line, empty state).
 - Optional text-to-speech via Web Speech API (`de-DE`).
+- Centralized state transitions via `dispatch(action)`.
+- Accessibility improvements (`aria-pressed` toggles, non-color quiz feedback markers).
 - Installable PWA with app manifest and service worker.
 - Offline support with cached app shell and runtime caching.
 - Automatic update activation for newly installed service worker versions.
@@ -65,7 +68,9 @@ npm run validate:data
 ├─ src/
 │  └─ index.html
 │  └─ index.js
+│  └─ i18n.js
 │  └─ state.js
+│  └─ quiz-logic.js
 │  └─ data/
 │     └─ verbs.js
 │     └─ verb-schema.js
@@ -84,6 +89,8 @@ npm run validate:data
 ├─ scripts/
 │  └─ validate-verbs.js
 ├─ tests/
+│  └─ app-smoke.test.js
+│  └─ quiz-logic.test.js
 │  └─ validate-verbs.test.js
 │  └─ verb-schema.test.js
 │  └─ pwa.test.js
@@ -141,7 +148,7 @@ The validator `scripts/validate-verbs.js` checks:
 
 Canonical normalized shape:
 
-- `id`: string (optional, reserved for future step `1.3`);
+- `id`: required unique string;
 - `level`: CEFR level (`A1`, `A2`, `B1`, ...);
 - `infinitive`, `present3`, `preterite`, `participle2`, `auxiliary`: normalized verb forms;
 - `classes`: grouped vowel-change markers (`infinitive`, `present3`, `preterite`, `participle2`);
@@ -155,15 +162,28 @@ The normalizer accepts legacy record keys from `src/data/verbs.js` and converts 
 The browser runtime is split into ES modules:
 
 - `src/index.js`: app bootstrap, wiring, event handlers;
+- `src/i18n.js`: UI localization dictionaries for RU/UA/EN;
 - `src/state.js`: state shape and transition helpers;
 - `src/ui/learn.js`: learn-mode rendering;
 - `src/ui/quiz.js`: quiz-mode rendering and option generation;
 - `src/services/tts.js`: TTS voice selection, speaking, and footer info rendering.
 
+Additional shared UMD module:
+
+- `src/quiz-logic.js`: pure quiz logic (`makeSmartOptions`, quiz stage transitions), reused by tests.
+
+## State Flow
+
+- State updates go through centralized `dispatch(action)` in `src/index.js`.
+- Transition rules are implemented in `src/state.js` reducer helpers.
+- The app uses a single render flow (`renderApp`) after each dispatched action.
+
 ## Testing
 
 The project currently includes:
 
+- app shell initialization smoke test: `tests/app-smoke.test.js`;
+- quiz logic tests (`makeSmartOptions`, quiz transitions): `tests/quiz-logic.test.js`;
 - dataset validation tests: `tests/validate-verbs.test.js`;
 - PWA registration and helper logic tests: `tests/pwa.test.js`.
 - app version format/runtime tests: `tests/app-version.test.js`.

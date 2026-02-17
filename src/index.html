@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0b0b0b" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <link rel="manifest" href="./manifest.webmanifest" />
 <link rel="icon" href="./icons/icon-192.svg" type="image/svg+xml" />
@@ -29,37 +30,46 @@
     background: var(--bg);
     color: var(--text);
   }
+  /* Controls */
   .container { max-width: 920px; margin: 0 auto; padding: clamp(12px, 2.5vw, 24px); padding-bottom: calc(env(safe-area-inset-bottom,0) + 16px); }
   .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .left, .right { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-
-  /* Language switcher: segmented buttons */
+  .controls-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .tts-toggle { display: flex; gap: 6px; align-items: center; }
   .segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--inactive); }
   .segmented button { border: 0; background: transparent; padding: 10px 14px; font-weight: 600; cursor: pointer; min-width: 52px; }
   .segmented button.active { background: var(--primary); }
-
-  /* Mode buttons */
   .btn { padding: 10px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--inactive); cursor: pointer; font-weight: 600; }
   .btn.active { background: var(--primary); }
   .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
 
-  /* Card */
+  /* Cards and typography */
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: clamp(14px, 3vw, 18px); box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
   .label { font-size: 12px; color: var(--muted); }
   .colhdr { font-size: clamp(14px, 2vw, 18px); }
   .value-lg { font-size: clamp(28px, 8vw, 48px); line-height: 1.1; }
-  .value-md { font-size: clamp(20px, 6vw, 32px); line-height: 1.15; }
-  .form3 { color: var(--muted); font-weight: 400; } /* 3rd person singular in muted regular style */
-  .aux { color: var(--muted); font-style: italic; margin-right: 6px; } /* haben/sein always muted and italic */
-  .muted { color: var(--muted); }
-  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .spacer { height: 8px; }
-  .gap-block { height: 16px; } /* empty row between quiz blocks */
+  .form3 { color: var(--muted); font-weight: 400; }
+  .aux { color: var(--muted); font-style: italic; margin-right: 6px; }
+  .invert { color: #fff; background: #000; border-radius: 12px; padding: 10px 12px; text-align: center; }
+  .full-width { width: 100%; }
+  .actions { display: flex; margin-top: 12px; }
+  .actions-right { justify-content: flex-end; }
 
-  /* Quiz option buttons */
-  .options { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 8px 0 14px; }
-  @media (min-width: 560px) { .options { grid-template-columns: repeat(2, minmax(0,1fr)); } }
-  @media (min-width: 880px) { .options { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+  /* Learn mode */
+  .flash-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .forms-header { display: flex; width: 100%; justify-content: space-between; }
+  .forms-header-center { text-align: center; }
+  .forms-header-right { text-align: right; }
+  .forms-line { display: flex; width: 100%; }
+  .forms-line-left { justify-content: flex-start; }
+  .forms-line-center { justify-content: center; }
+  .forms-line-right { justify-content: flex-end; }
+
+  /* Quiz mode */
+  .quiz-layout { display: grid; gap: 10px; }
+  .quiz-step { margin-top: 12px; }
+  .quiz-options { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 8px 0 14px; }
+  @media (min-width: 560px) { .quiz-options { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  @media (min-width: 880px) { .quiz-options { grid-template-columns: repeat(3, minmax(0,1fr)); } }
   .opt {
     padding: 12px 14px;
     border: 1px solid var(--border);
@@ -74,17 +84,17 @@
   .opt:active { transform: translateY(1px); }
   .opt-wrong { background: #fecaca !important; border-color: #fca5a5 !important; }
   .opt-right { background: #bbf7d0 !important; border-color: #86efac !important; }
+  .feedback-text { display: inline-block; font-size: 0.45em; margin-left: 8px; vertical-align: middle; }
+  .step-label { color: var(--muted); font-size: clamp(14px, 4vw, 24px); }
+  .answer-value { text-align: center; }
+  .quiz-prompt { text-align: center; }
 
-  .step-label { color: var(--muted); font-size: clamp(14px, 4vw, 24px); } /* around 2x smaller than option text */
+  /* Empty state */
+  .empty-state { text-align: center; }
+  .empty-title { margin: 0 0 12px; font-size: 24px; }
+  .empty-body { margin: 0; color: var(--muted); }
 
-  .flash { display: grid; grid-template-columns: 1fr; gap: 8px; }
-  .line { display: flex; width: 100%; }
-  .left { justify-content: flex-start; }
-  .center { justify-content: center; }
-  .right { justify-content: flex-end; }
-  .invert { color: #fff; background: #000; border-radius: 12px; padding: 10px 12px; text-align: center; }
-
-  /* Bottom section: TTS info */
+  /* TTS info */
   .tts-info { max-width: 920px; margin: 10px auto 24px; padding: 0 16px; }
   .tts-info .tiny { color: var(--muted); font-size: 12px; text-align: center; }
 </style>
@@ -92,20 +102,20 @@
 <body>
 <div class="container">
   <div class="controls">
-    <div class="left">
-      <div class="segmented" id="langGroup">
-        <button data-lang="EN">EN</button>
-        <button data-lang="UA">UA</button>
-        <button data-lang="RU" class="active">RU</button>
+    <div class="controls-group">
+      <div class="segmented" id="langGroup" role="group" aria-label="Language">
+        <button type="button" data-lang="EN">EN</button>
+        <button type="button" data-lang="UA">UA</button>
+        <button type="button" data-lang="RU" class="active">RU</button>
       </div>
-      <label class="row" style="gap:6px;">
+      <label class="tts-toggle">
         <input id="ttsToggle" type="checkbox" />
-        <span class="label">Озвучка (de-DE)</span>
+        <span id="ttsLabel" class="label">Speech (de-DE)</span>
       </label>
     </div>
-    <div class="right">
-      <button id="modeLearn" class="btn active">Обучение</button>
-      <button id="modeQuiz" class="btn">Проверка</button>
+    <div class="controls-group" role="group" aria-label="Mode">
+      <button type="button" id="modeLearn" class="btn active">Learn</button>
+      <button type="button" id="modeQuiz" class="btn">Quiz</button>
     </div>
   </div>
 
@@ -117,6 +127,7 @@
 
 <script src="./data/verbs.js"></script>
 <script src="./data/verb-schema.js"></script>
+<script src="./quiz-logic.js"></script>
 <script src="./app-version.js"></script>
 <script src="./pwa.js"></script>
 <script type="module" src="./index.js"></script>

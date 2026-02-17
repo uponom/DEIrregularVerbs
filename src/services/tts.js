@@ -5,6 +5,7 @@ export function createTtsService() {
   const state = {
     voices: [],
     deVoice: null,
+    lastError: null,
   };
 
   function hasApi() {
@@ -31,8 +32,10 @@ export function createTtsService() {
       }
 
       state.deVoice = voice || null;
+      state.lastError = null;
     } catch (_err) {
       state.deVoice = null;
+      state.lastError = 'VOICE_PICK_FAILED';
     }
   }
 
@@ -52,22 +55,24 @@ export function createTtsService() {
       utterance.rate = TTS_RATE;
       utterance.pitch = TTS_PITCH;
       window.speechSynthesis.speak(utterance);
+      state.lastError = null;
     } catch (_err) {
-      // Ignore TTS errors to keep app flow stable.
+      state.lastError = 'SPEAK_FAILED';
     }
   }
 
-  function renderInfo(target, enabled, version) {
+  function renderInfo(target, enabled, version, labels) {
     if (!target) return;
 
+    const safeLabels = labels || {};
     const voice = state.deVoice;
     const parts = [
-      `Version: ${version || 'dev'}`,
-      `Движок: ${hasApi() ? 'Web Speech API' : '—'}`,
-      `Включено: ${enabled ? 'да' : 'нет'}`,
-      `Голос: ${voice ? `${voice.name} (${voice.lang || ''})` : '—'}`,
-      `Скорость: ${TTS_RATE}`,
-      `Тембр: ${TTS_PITCH}`,
+      `${safeLabels.version || 'Version'}: ${version || 'dev'}`,
+      `${safeLabels.engine || 'Engine'}: ${hasApi() ? 'Web Speech API' : '—'}`,
+      `${safeLabels.enabled || 'Enabled'}: ${enabled ? (safeLabels.yes || 'yes') : (safeLabels.no || 'no')}`,
+      `${safeLabels.voice || 'Voice'}: ${voice ? `${voice.name} (${voice.lang || ''})` : '—'}`,
+      `${safeLabels.speed || 'Rate'}: ${TTS_RATE}`,
+      `${safeLabels.pitch || 'Pitch'}: ${TTS_PITCH}`,
     ];
     target.textContent = parts.join(' · ');
   }
@@ -95,6 +100,7 @@ export function createTtsService() {
   }
 
   return {
+    getLastError: () => state.lastError,
     init,
     pickGermanVoice,
     renderInfo,

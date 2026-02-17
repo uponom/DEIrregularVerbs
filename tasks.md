@@ -51,45 +51,45 @@
 - [x] 2.1.6 Wire modules in `src/index.html`.
 
 ## 3) State Management
-- [ ] 3.1 Remove scattered direct global state mutations.
-- [ ] 3.2 Introduce a centralized `dispatch(action)` (or equivalent).
-- [ ] 3.3 Move transitions (`next`, `mode switch`, `quiz reset`, `set language`, `set tts`) into dedicated functions.
-- [ ] 3.4 Ensure a single rendering flow after state changes.
+- [x] 3.1 Remove scattered direct global state mutations.
+- [x] 3.2 Introduce a centralized `dispatch(action)` (or equivalent).
+- [x] 3.3 Move transitions (`next`, `mode switch`, `quiz reset`, `set language`, `set tts`) into dedicated functions.
+- [x] 3.4 Ensure a single rendering flow after state changes.
 
 ## 4) Rendering and Safety
-- [ ] 4.1 Reduce `innerHTML` usage where user/external data can be involved.
-- [ ] 4.2 Move dynamic rendering to `createElement` + `textContent`.
-- [ ] 4.3 Extract recurring UI blocks into small component-like functions.
-- [ ] 4.4 Minimize string-based HTML interpolation.
+- [x] 4.1 Reduce `innerHTML` usage where user/external data can be involved.
+- [x] 4.2 Move dynamic rendering to `createElement` + `textContent`.
+- [x] 4.3 Extract recurring UI blocks into small component-like functions.
+- [x] 4.4 Minimize string-based HTML interpolation.
 
 ## 5) Styles and Layout
-- [ ] 5.1 Move inline styles from HTML/JS to CSS classes.
-- [ ] 5.2 Remove semantic collisions in CSS classes (for example split `.left/.right` by context).
-- [ ] 5.3 Group CSS by logical blocks (controls, card, quiz options, tts info).
-- [ ] 5.4 Use clearer class names for maintainability.
+- [x] 5.1 Move inline styles from HTML/JS to CSS classes.
+- [x] 5.2 Remove semantic collisions in CSS classes (for example split `.left/.right` by context).
+- [x] 5.3 Group CSS by logical blocks (controls, card, quiz options, tts info).
+- [x] 5.4 Use clearer class names for maintainability.
 
 ## 6) Accessibility and UX
-- [ ] 6.1 Add accessibility attributes for language/mode toggles (`aria-pressed`, roles/labels where needed).
-- [ ] 6.2 Ensure correct/wrong feedback is not color-only.
-- [ ] 6.3 Verify keyboard navigation for mode buttons and answer options.
-- [ ] 6.4 Add an explicit empty-state screen when no items are available.
+- [x] 6.1 Add accessibility attributes for language/mode toggles (`aria-pressed`, roles/labels where needed).
+- [x] 6.2 Ensure correct/wrong feedback is not color-only.
+- [x] 6.3 Verify keyboard navigation for mode buttons and answer options.
+- [x] 6.4 Add an explicit empty-state screen when no items are available.
 
 ## 7) Stability and Guards
-- [ ] 7.1 Add protection for empty `ITEMS` (avoid crashes in `renderLearn`/`renderQuiz`).
-- [ ] 7.2 Add guard branches for missing verb forms.
-- [ ] 7.3 Simplify and centralize TTS error handling.
+- [x] 7.1 Add protection for empty `ITEMS` (avoid crashes in `renderLearn`/`renderQuiz`).
+- [x] 7.2 Add guard branches for missing verb forms.
+- [x] 7.3 Simplify and centralize TTS error handling.
 
 ## 8) Internationalization
-- [ ] 8.1 Move UI strings to a localization dictionary.
-- [ ] 8.2 Add full UI translations for RU/UA/EN (not only verb translations).
-- [ ] 8.3 Remove hardcoded RU strings from rendering and handlers.
+- [x] 8.1 Move UI strings to a localization dictionary.
+- [x] 8.2 Add full UI translations for RU/UA/EN (not only verb translations).
+- [x] 8.3 Remove hardcoded RU strings from rendering and handlers.
 
 ## 9) Testing and Regression Control
-- [ ] 9.1 Add minimum tests/checks.
-- [ ] 9.1.1 Test option generation (`makeSmartOptions`).
-- [ ] 9.1.2 Test quiz step transitions.
+- [x] 9.1 Add minimum tests/checks.
+- [x] 9.1.1 Test option generation (`makeSmartOptions`).
+- [x] 9.1.2 Test quiz step transitions.
 - [x] 9.1.3 Test duplicate and empty-field handling in data validation.
-- [ ] 9.2 Add a smoke test for app initialization.
+- [x] 9.2 Add a smoke test for app initialization.
 
 ## 10) Incremental Delivery Plan
 - [ ] 10.1 Phase 1: data extraction + deduplication + validation.
