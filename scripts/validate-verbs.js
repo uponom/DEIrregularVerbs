@@ -5,16 +5,16 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const INDEX_HTML = path.join(ROOT, 'src', 'index.html');
+const VERBS_DATA_FILE = path.join(ROOT, 'src', 'data', 'verbs.js');
 
-function parseVerbsFromIndexHtml(filePath) {
+function parseVerbsFromDataFile(filePath) {
   const source = fs.readFileSync(filePath, 'utf8');
-  const match = source.match(/const\s+VERBS\s*=\s*\[(.|\r|\n)*?\];/);
+  const match = source.match(/window\.VERBS\s*=\s*\[(.|\r|\n)*?\];/);
   if (!match) {
-    throw new Error('Cannot find `const VERBS = [...]` in src/index.html');
+    throw new Error('Cannot find `window.VERBS = [...]` in src/data/verbs.js');
   }
 
-  const expr = match[0].replace(/^const\s+VERBS\s*=\s*/, '').replace(/;\s*$/, '');
+  const expr = match[0].replace(/^window\.VERBS\s*=\s*/, '').replace(/;\s*$/, '');
   let verbs;
   try {
     verbs = new Function(`return (${expr});`)();
@@ -163,7 +163,7 @@ function validateRecords(verbs) {
 }
 
 function main() {
-  const verbs = parseVerbsFromIndexHtml(INDEX_HTML);
+  const verbs = parseVerbsFromDataFile(VERBS_DATA_FILE);
   const { errors, warnings } = validateRecords(verbs);
 
   if (warnings.length > 0) {
@@ -191,7 +191,7 @@ module.exports = {
   levelRank,
   mergeTranslationSets,
   normalizeString,
-  parseVerbsFromIndexHtml,
+  parseVerbsFromDataFile,
   setsEqual,
   splitTranslations,
   translationSet,

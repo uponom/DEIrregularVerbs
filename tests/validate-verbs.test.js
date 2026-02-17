@@ -1,9 +1,12 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const {
   dedupeKey,
   levelRank,
+  parseVerbsFromDataFile,
   splitTranslations,
   validateRecords,
 } = require('../scripts/validate-verbs.js');
@@ -11,6 +14,20 @@ const {
 test('splitTranslations trims tokens and drops empty values', () => {
   const result = splitTranslations(' one, two ,, three ');
   assert.deepEqual(result, ['one', 'two', 'three']);
+});
+
+test('parseVerbsFromDataFile parses window.VERBS assignment', () => {
+  const tmpDir = fs.mkdtempSync('/tmp/verbs-data-');
+  const tmpFile = path.join(tmpDir, 'verbs.js');
+  fs.writeFileSync(
+    tmpFile,
+    "window.VERBS = [{\"Infinitiv\":\"gehen\",\"Praeteritum\":\"ging\",\"Partizip2\":\"gegangen\",\"RU\":\"идти\"}];\n"
+  );
+
+  const verbs = parseVerbsFromDataFile(tmpFile);
+  assert.equal(Array.isArray(verbs), true);
+  assert.equal(verbs.length, 1);
+  assert.equal(verbs[0].Infinitiv, 'gehen');
 });
 
 test('dedupeKey uses Infinitiv + Praeteritum + Partizip2', () => {

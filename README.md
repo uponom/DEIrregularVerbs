@@ -64,6 +64,8 @@ npm run validate:data
 .
 ├─ src/
 │  └─ index.html
+│  └─ data/
+│     └─ verbs.js
 │  └─ manifest.webmanifest
 │  └─ app-version.js
 │  └─ pwa.js
@@ -102,6 +104,7 @@ npm run validate:data
 ## Duplicate Handling Policy (Dataset)
 
 The verbs dataset follows a strict deduplication policy.
+The current source file is `src/data/verbs.js`.
 
 1. Deduplication key:
 `Infinitiv + Praeteritum + Partizip2`.
