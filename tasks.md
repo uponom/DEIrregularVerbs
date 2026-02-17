@@ -16,10 +16,10 @@
 - [ ] 1.1 Move the verbs dictionary out of `src/index.html` into a separate file (`src/data/verbs.json` or `src/data/verbs.js`).
 - [ ] 1.2 Normalize the verb record schema.
 - [ ] 1.3 Add a unique `id` to each record.
-- [ ] 1.4 Remove/merge duplicate verbs (including repeated `werfen`, `sehen`, `helfen`, `stehen`, etc.).
-- [ ] 1.4.1 Resolve duplicates for `werfen`.
-- [ ] 1.4.2 Resolve duplicates for `sehen`.
-- [ ] 1.4.3 Resolve duplicates for `lesen`.
+- [ ] 1.4 Remove/merge duplicate verbs.
+- [x] 1.4.1 Resolve duplicates for `werfen`.
+- [x] 1.4.2 Resolve duplicates for `sehen`.
+- [x] 1.4.3 Resolve duplicates for `lesen`.
 - [ ] 1.4.4 Resolve duplicates for `essen`.
 - [ ] 1.4.5 Resolve duplicates for `geben`.
 - [ ] 1.4.6 Resolve duplicates for `nehmen`.
