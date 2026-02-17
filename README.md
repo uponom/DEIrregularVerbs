@@ -42,6 +42,22 @@ python -m http.server 8080
 
 Then open `http://localhost:8080`.
 
+## GitHub Pages Deployment
+
+The project includes a GitHub Actions workflow that deploys the app from `src/` to GitHub Pages:
+
+- workflow file: `.github/workflows/deploy-pages.yml`;
+- trigger: push to `main` (and manual run from Actions UI);
+- published artifact path: `src`.
+
+Repository setup (one-time):
+
+1. Open repository `Settings` -> `Pages`.
+2. In `Build and deployment`, set `Source` to `GitHub Actions`.
+3. Push to `main` (or run the workflow manually in `Actions`).
+
+After successful deployment, the site URL appears in the workflow run summary and in `Settings` -> `Pages`.
+
 ## Scripts
 
 ```bash
