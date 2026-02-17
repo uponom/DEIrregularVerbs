@@ -14,27 +14,27 @@
 
 ## 1) Data Layer and Integrity
 - [x] 1.1 Move the verbs dictionary out of `src/index.html` into a separate file (`src/data/verbs.json` or `src/data/verbs.js`).
-- [ ] 1.2 Normalize the verb record schema.
-- [ ] 1.3 Add a unique `id` to each record.
-- [ ] 1.4 Remove/merge duplicate verbs.
-- [ ] 1.4.1 Resolve duplicates for `werfen`.
-- [ ] 1.4.2 Resolve duplicates for `sehen`.
-- [ ] 1.4.3 Resolve duplicates for `lesen`.
-- [ ] 1.4.4 Resolve duplicates for `essen`.
-- [ ] 1.4.5 Resolve duplicates for `geben`.
-- [ ] 1.4.6 Resolve duplicates for `nehmen`.
-- [ ] 1.4.7 Resolve duplicates for `helfen`.
-- [ ] 1.4.8 Resolve duplicates for `sterben`.
-- [ ] 1.4.9 Resolve duplicates for `treffen`.
-- [ ] 1.4.10 Resolve duplicates for `brechen`.
-- [ ] 1.4.11 Resolve duplicates for `fallen`.
-- [ ] 1.4.12 Resolve duplicates for `gefallen`.
-- [ ] 1.4.13 Resolve duplicates for `schlafen`.
-- [ ] 1.4.14 Resolve duplicates for `halten`.
-- [ ] 1.4.15 Resolve duplicates for `braten`.
-- [ ] 1.4.16 Resolve duplicates for `werden`.
-- [ ] 1.4.17 Resolve duplicates for `liegen`.
-- [ ] 1.4.18 Resolve duplicates for `stehen`.
+- [x] 1.2 Normalize the verb record schema.
+- [x] 1.3 Add a unique `id` to each record.
+- [x] 1.4 Remove/merge duplicate verbs.
+- [x] 1.4.1 Resolve duplicates for `werfen`.
+- [x] 1.4.2 Resolve duplicates for `sehen`.
+- [x] 1.4.3 Resolve duplicates for `lesen`.
+- [x] 1.4.4 Resolve duplicates for `essen`.
+- [x] 1.4.5 Resolve duplicates for `geben`.
+- [x] 1.4.6 Resolve duplicates for `nehmen`.
+- [x] 1.4.7 Resolve duplicates for `helfen`.
+- [x] 1.4.8 Resolve duplicates for `sterben`.
+- [x] 1.4.9 Resolve duplicates for `treffen`.
+- [x] 1.4.10 Resolve duplicates for `brechen`.
+- [x] 1.4.11 Resolve duplicates for `fallen`.
+- [x] 1.4.12 Resolve duplicates for `gefallen`.
+- [x] 1.4.13 Resolve duplicates for `schlafen`.
+- [x] 1.4.14 Resolve duplicates for `halten`.
+- [x] 1.4.15 Resolve duplicates for `braten`.
+- [x] 1.4.16 Resolve duplicates for `werden`.
+- [x] 1.4.17 Resolve duplicates for `liegen`.
+- [x] 1.4.18 Resolve duplicates for `stehen`.
 - [x] 1.5 Define and document duplicate handling rules.
 - [x] 1.6 Add dataset validation.
 - [x] 1.6.1 Validate required fields (`Infinitiv`, `Praeteritum`, `Partizip2`, at least one translation).
@@ -42,13 +42,13 @@
 - [x] 1.6.3 Add an npm script/utility for pre-release data validation.
 
 ## 2) Codebase Structure
-- [ ] 2.1 Split the application into modules without changing behavior.
-- [ ] 2.1.1 Create `src/index.js` for app initialization.
-- [ ] 2.1.2 Create `src/state.js` for state and transitions.
-- [ ] 2.1.3 Create `src/ui/learn.js` for learn mode.
-- [ ] 2.1.4 Create `src/ui/quiz.js` for quiz mode.
-- [ ] 2.1.5 Create `src/services/tts.js` for text-to-speech logic.
-- [ ] 2.1.6 Wire modules in `src/index.html`.
+- [x] 2.1 Split the application into modules without changing behavior.
+- [x] 2.1.1 Create `src/index.js` for app initialization.
+- [x] 2.1.2 Create `src/state.js` for state and transitions.
+- [x] 2.1.3 Create `src/ui/learn.js` for learn mode.
+- [x] 2.1.4 Create `src/ui/quiz.js` for quiz mode.
+- [x] 2.1.5 Create `src/services/tts.js` for text-to-speech logic.
+- [x] 2.1.6 Wire modules in `src/index.html`.
 
 ## 3) State Management
 - [ ] 3.1 Remove scattered direct global state mutations.

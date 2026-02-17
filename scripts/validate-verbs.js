@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { normalizeScalar, normalizeVerbRecord, normalizeVerbRecords } = require('../src/data/verb-schema.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const VERBS_DATA_FILE = path.join(ROOT, 'src', 'data', 'verbs.js');
@@ -29,10 +30,7 @@ function parseVerbsFromDataFile(filePath) {
   return verbs;
 }
 
-function normalizeString(value) {
-  if (value === null || value === undefined) return '';
-  return String(value).trim();
-}
+const normalizeString = normalizeScalar;
 
 function splitTranslations(value) {
   return normalizeString(value)
@@ -42,10 +40,11 @@ function splitTranslations(value) {
 }
 
 function translationSet(record) {
+  const normalized = normalizeVerbRecord(record);
   return {
-    RU: new Set(splitTranslations(record.RU)),
-    UA: new Set(splitTranslations(record.UA)),
-    EN: new Set(splitTranslations(record.EN)),
+    RU: new Set(splitTranslations(normalized.translations.ru)),
+    UA: new Set(splitTranslations(normalized.translations.ua)),
+    EN: new Set(splitTranslations(normalized.translations.en)),
   };
 }
 
@@ -72,24 +71,42 @@ function levelRank(level) {
 }
 
 function dedupeKey(v) {
-  return [normalizeString(v.Infinitiv), normalizeString(v.Praeteritum), normalizeString(v.Partizip2)].join('|');
+  const normalized = normalizeVerbRecord(v);
+  return [normalized.infinitive, normalized.preterite, normalized.participle2].join('|');
 }
 
 function hasVariantMarker(v) {
-  return Boolean(normalizeString(v.Variant) || normalizeString(v.Note) || normalizeString(v.Notes));
+  const normalized = normalizeVerbRecord(v);
+  return Boolean(normalized.variant || normalized.note);
 }
 
 function validateRecords(verbs) {
+  const normalizedRecords = normalizeVerbRecords(verbs);
   const errors = [];
   const warnings = [];
+  const idRows = new Map();
 
   // Rule 1: Key = Infinitiv + Praeteritum + Partizip2
   const keyGroups = new Map();
-  verbs.forEach((v, idx) => {
+  normalizedRecords.forEach((v, idx) => {
+    const id = normalizeString(v.id);
+    if (!id) {
+      errors.push(`[MISSING_ID] row=${idx + 1} (id is required)`);
+    } else {
+      if (!idRows.has(id)) idRows.set(id, []);
+      idRows.get(id).push(idx + 1);
+    }
+
     const key = dedupeKey(v);
     if (!keyGroups.has(key)) keyGroups.set(key, []);
     keyGroups.get(key).push({ v, idx });
   });
+
+  for (const [id, rows] of idRows.entries()) {
+    if (rows.length > 1) {
+      errors.push(`[DUPLICATE_ID] id=${id} rows=${rows.join(',')}`);
+    }
+  }
 
   // Rule 2 + 3 + 5:
   // - For exact duplicate key keep one record only
@@ -98,9 +115,9 @@ function validateRecords(verbs) {
   for (const [key, group] of keyGroups.entries()) {
     if (group.length < 2) continue;
 
-    const levels = group.map(({ v }) => normalizeString(v.Level));
-    const bestRank = Math.min(...group.map(({ v }) => levelRank(v.Level)));
-    const bestRows = group.filter(({ v }) => levelRank(v.Level) === bestRank);
+    const levels = group.map(({ v }) => normalizeString(v.level));
+    const bestRank = Math.min(...group.map(({ v }) => levelRank(v.level)));
+    const bestRows = group.filter(({ v }) => levelRank(v.level) === bestRank);
     if (bestRows.length !== 1) {
       warnings.push(
         `[DUPLICATE_LEVEL_TIE] key=${key} rows=${group.map((x) => x.idx + 1).join(',')} levels=${levels.join(',')}`
@@ -126,8 +143,8 @@ function validateRecords(verbs) {
 
   // Rule 4: same infinitive, different grammar variant -> keep both, but mark variant explicitly.
   const infGroups = new Map();
-  verbs.forEach((v, idx) => {
-    const inf = normalizeString(v.Infinitiv);
+  normalizedRecords.forEach((v, idx) => {
+    const inf = normalizeString(v.infinitive);
     if (!infGroups.has(inf)) infGroups.set(inf, []);
     infGroups.get(inf).push({ v, idx });
   });
@@ -145,15 +162,17 @@ function validateRecords(verbs) {
   }
 
   // Optional sanity checks for required fields
-  verbs.forEach((v, idx) => {
-    const inf = normalizeString(v.Infinitiv);
-    const pret = normalizeString(v.Praeteritum);
-    const part2 = normalizeString(v.Partizip2);
+  normalizedRecords.forEach((v, idx) => {
+    const inf = normalizeString(v.infinitive);
+    const pret = normalizeString(v.preterite);
+    const part2 = normalizeString(v.participle2);
     if (!inf || !pret || !part2) {
       errors.push(`[MISSING_REQUIRED_FIELDS] row=${idx + 1} (Infinitiv/Praeteritum/Partizip2 are required)`);
     }
 
-    const hasTranslation = Boolean(normalizeString(v.RU) || normalizeString(v.UA) || normalizeString(v.EN));
+    const hasTranslation = Boolean(
+      normalizeString(v.translations.ru) || normalizeString(v.translations.ua) || normalizeString(v.translations.en)
+    );
     if (!hasTranslation) {
       errors.push(`[MISSING_TRANSLATION] row=${idx + 1} (one of RU/UA/EN is required)`);
     }

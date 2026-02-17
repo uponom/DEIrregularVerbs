@@ -47,8 +47,8 @@ test('levelRank prefers lower CEFR levels', () => {
 
 test('validateRecords flags duplicate key as error', () => {
   const records = [
-    { Level: 'A2', Infinitiv: 'sehen', Praeteritum: 'sah', Partizip2: 'gesehen', RU: 'видеть' },
-    { Level: 'A1', Infinitiv: 'sehen', Praeteritum: 'sah', Partizip2: 'gesehen', RU: 'увидеть' },
+    { id: 'sehen-sah-gesehen-a2', Level: 'A2', Infinitiv: 'sehen', Praeteritum: 'sah', Partizip2: 'gesehen', RU: 'видеть' },
+    { id: 'sehen-sah-gesehen-a1', Level: 'A1', Infinitiv: 'sehen', Praeteritum: 'sah', Partizip2: 'gesehen', RU: 'увидеть' },
   ];
 
   const result = validateRecords(records);
@@ -58,7 +58,7 @@ test('validateRecords flags duplicate key as error', () => {
 
 test('validateRecords flags missing required fields and translations', () => {
   const records = [
-    { Level: 'A1', Infinitiv: '', Praeteritum: 'ging', Partizip2: 'gegangen', RU: '' },
+    { id: 'gehen-ging-gegangen', Level: 'A1', Infinitiv: '', Praeteritum: 'ging', Partizip2: 'gegangen', RU: '' },
   ];
 
   const result = validateRecords(records);
@@ -68,10 +68,22 @@ test('validateRecords flags missing required fields and translations', () => {
 
 test('validateRecords warns if grammar variants are not marked', () => {
   const records = [
-    { Level: 'A1', Infinitiv: 'backen', Praeteritum: 'buk', Partizip2: 'gebacken', RU: 'печь' },
-    { Level: 'A1', Infinitiv: 'backen', Praeteritum: 'backte', Partizip2: 'gebacken', RU: 'печь' },
+    { id: 'backen-buk-gebacken', Level: 'A1', Infinitiv: 'backen', Praeteritum: 'buk', Partizip2: 'gebacken', RU: 'печь' },
+    { id: 'backen-backte-gebacken', Level: 'A1', Infinitiv: 'backen', Praeteritum: 'backte', Partizip2: 'gebacken', RU: 'печь' },
   ];
 
   const result = validateRecords(records);
   assert.equal(result.warnings.some((x) => x.includes('[MISSING_VARIANT_MARKER]')), true);
+});
+
+test('validateRecords flags missing and duplicate ids', () => {
+  const records = [
+    { id: '', Level: 'A1', Infinitiv: 'gehen', Praeteritum: 'ging', Partizip2: 'gegangen', RU: 'идти' },
+    { id: 'gehen-ging-gegangen', Level: 'A1', Infinitiv: 'kommen', Praeteritum: 'kam', Partizip2: 'gekommen', RU: 'приходить' },
+    { id: 'gehen-ging-gegangen', Level: 'A1', Infinitiv: 'sein', Praeteritum: 'war', Partizip2: 'gewesen', RU: 'быть' },
+  ];
+
+  const result = validateRecords(records);
+  assert.equal(result.errors.some((x) => x.includes('[MISSING_ID]')), true);
+  assert.equal(result.errors.some((x) => x.includes('[DUPLICATE_ID]')), true);
 });

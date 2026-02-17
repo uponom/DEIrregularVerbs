@@ -64,8 +64,16 @@ npm run validate:data
 .
 ├─ src/
 │  └─ index.html
+│  └─ index.js
+│  └─ state.js
 │  └─ data/
 │     └─ verbs.js
+│     └─ verb-schema.js
+│  └─ ui/
+│     ├─ learn.js
+│     └─ quiz.js
+│  └─ services/
+│     └─ tts.js
 │  └─ manifest.webmanifest
 │  └─ app-version.js
 │  └─ pwa.js
@@ -77,6 +85,7 @@ npm run validate:data
 │  └─ validate-verbs.js
 ├─ tests/
 │  └─ validate-verbs.test.js
+│  └─ verb-schema.test.js
 │  └─ pwa.test.js
 ├─ tasks.md
 ├─ package.json
@@ -119,14 +128,37 @@ keep variants, but mark them explicitly with `Variant` or `Note`.
 
 The validator `scripts/validate-verbs.js` checks:
 
+- required and unique `id` per record;
 - duplicate keys;
 - required fields (`Infinitiv`, `Praeteritum`, `Partizip2`);
 - presence of at least one translation (`RU`/`UA`/`EN`);
 - translation merge hints;
 - missing variant markers for grammar variants.
 
-Note: the current dataset still contains duplicates, so `npm run validate:data`
-fails until deduplication tasks are completed.
+## Verb Record Schema
+
+`src/data/verb-schema.js` provides shared normalization for both browser UI and Node.js validation.
+
+Canonical normalized shape:
+
+- `id`: string (optional, reserved for future step `1.3`);
+- `level`: CEFR level (`A1`, `A2`, `B1`, ...);
+- `infinitive`, `present3`, `preterite`, `participle2`, `auxiliary`: normalized verb forms;
+- `classes`: grouped vowel-change markers (`infinitive`, `present3`, `preterite`, `participle2`);
+- `variant`, `note`: optional variant metadata;
+- `translations`: `{ ru, ua, en }`.
+
+The normalizer accepts legacy record keys from `src/data/verbs.js` and converts them into this canonical schema.
+
+## Runtime Modules
+
+The browser runtime is split into ES modules:
+
+- `src/index.js`: app bootstrap, wiring, event handlers;
+- `src/state.js`: state shape and transition helpers;
+- `src/ui/learn.js`: learn-mode rendering;
+- `src/ui/quiz.js`: quiz-mode rendering and option generation;
+- `src/services/tts.js`: TTS voice selection, speaking, and footer info rendering.
 
 ## Testing
 
