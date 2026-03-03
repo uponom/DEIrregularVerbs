@@ -10,12 +10,13 @@ A single-page Progressive Web App (PWA) for learning German irregular verbs.
 - Full UI localization for `RU`, `UA`, `EN` (controls, quiz labels, status line, empty state).
 - Emoji-based top controls for auto-speech toggle and full verbs list modal.
 - Verbs list modal with dynamic CEFR level filters and sort toggle (infinitive/translation).
-- Shared dynamic CEFR level filters for Learn, Quiz, and verbs list modal.
+- Independent dynamic CEFR level filters for Learn/Quiz cards and verbs list modal.
+- Level filter guards prevent turning off all levels (at least one level always stays selected).
 - Full-width segmented mode switch (`Learn` / `Quiz`) aligned with language switch style.
 - Per-card manual speak button in Learn mode (independent from auto-speech toggle).
 - Optional text-to-speech via Web Speech API (`de-DE`).
 - TTS speaks German forms and then translation in the active UI language (`RU`/`UA`/`EN`).
-- Auto-TTS in Learn mode triggers only when a new card is shown.
+- Auto-TTS in Learn mode triggers only when a new card is shown and never from modal filter interactions.
 - Centralized state transitions via `dispatch(action)`.
 - Accessibility improvements (`aria-pressed` toggles, non-color quiz feedback markers).
 - Installable PWA with app manifest and service worker.

@@ -8,7 +8,8 @@ export const ACTIONS = {
   OPEN_VERBS_MODAL: 'OPEN_VERBS_MODAL',
   CLOSE_VERBS_MODAL: 'CLOSE_VERBS_MODAL',
   TOGGLE_VERBS_SORT: 'TOGGLE_VERBS_SORT',
-  TOGGLE_LEVEL_FILTER: 'TOGGLE_LEVEL_FILTER',
+  TOGGLE_MAIN_LEVEL_FILTER: 'TOGGLE_MAIN_LEVEL_FILTER',
+  TOGGLE_MODAL_LEVEL_FILTER: 'TOGGLE_MODAL_LEVEL_FILTER',
   RESET_LEVEL_FILTERS: 'RESET_LEVEL_FILTERS',
   QUIZ_RESET: 'QUIZ_RESET',
   QUIZ_SET_DE: 'QUIZ_SET_DE',
@@ -29,7 +30,8 @@ export function createInitialState() {
     q: createQuizProgress(),
     verbsModalOpen: false,
     verbsSortMode: 'infinitive',
-    selectedLevels: null,
+    selectedMainLevels: null,
+    selectedModalLevels: null,
   };
 }
 
@@ -123,22 +125,28 @@ export function reduceState(state, action, context) {
         ...currentState,
         verbsSortMode: currentState.verbsSortMode === 'infinitive' ? 'translation' : 'infinitive',
       };
-    case ACTIONS.TOGGLE_LEVEL_FILTER: {
+    case ACTIONS.TOGGLE_MAIN_LEVEL_FILTER:
+    case ACTIONS.TOGGLE_MODAL_LEVEL_FILTER: {
       const allLevels = Array.isArray(context?.levels) ? context.levels : [];
-      const selected = Array.isArray(currentState.selectedLevels) ? currentState.selectedLevels : allLevels.slice();
+      const selectedKey = action.type === ACTIONS.TOGGLE_MAIN_LEVEL_FILTER ? 'selectedMainLevels' : 'selectedModalLevels';
+      const selected = Array.isArray(currentState[selectedKey]) ? currentState[selectedKey] : allLevels.slice();
       const level = action.value;
       if (!level) return currentState;
       const hasLevel = selected.includes(level);
+      if (hasLevel && selected.length === 1) {
+        return currentState;
+      }
       const nextSelected = hasLevel ? selected.filter((x) => x !== level) : [...selected, level];
       return {
         ...currentState,
-        selectedLevels: nextSelected,
+        [selectedKey]: nextSelected,
       };
     }
     case ACTIONS.RESET_LEVEL_FILTERS:
       return {
         ...currentState,
-        selectedLevels: null,
+        selectedMainLevels: null,
+        selectedModalLevels: null,
       };
     case ACTIONS.QUIZ_RESET:
       return {

@@ -36,16 +36,25 @@ const AVAILABLE_LEVELS = VERBS_LIST.getAvailableLevels(ITEMS);
 let store;
 let lastAutoSpokenCardId = null;
 
-function getSelectedLevels(state) {
-  if (Array.isArray(state.selectedLevels)) return state.selectedLevels;
+function getSelectedMainLevels(state) {
+  if (Array.isArray(state.selectedMainLevels)) return state.selectedMainLevels;
   return AVAILABLE_LEVELS.slice();
 }
 
-function getFilteredItems(state) {
-  return VERBS_LIST.filterByLevels(ITEMS, state.selectedLevels, AVAILABLE_LEVELS);
+function getSelectedModalLevels(state) {
+  if (Array.isArray(state.selectedModalLevels)) return state.selectedModalLevels;
+  return AVAILABLE_LEVELS.slice();
 }
 
-store = createStore(createInitialState(), () => ({ itemsLength: getFilteredItems(store.getState()).length, levels: AVAILABLE_LEVELS }));
+function getMainFilteredItems(state) {
+  return VERBS_LIST.filterByLevels(ITEMS, state.selectedMainLevels, AVAILABLE_LEVELS);
+}
+
+function getModalFilteredItems(state) {
+  return VERBS_LIST.filterByLevels(ITEMS, state.selectedModalLevels, AVAILABLE_LEVELS);
+}
+
+store = createStore(createInitialState(), () => ({ itemsLength: getMainFilteredItems(store.getState()).length, levels: AVAILABLE_LEVELS }));
 
 function getState() {
   return store.getState();
@@ -111,7 +120,7 @@ function renderControls() {
 
 function renderLevelFilterButtons() {
   const state = getState();
-  const selected = new Set(getSelectedLevels(state));
+  const selected = new Set(getSelectedMainLevels(state));
   levelFilters.replaceChildren();
   AVAILABLE_LEVELS.forEach((level) => {
     const button = document.createElement('button');
@@ -119,7 +128,7 @@ function renderLevelFilterButtons() {
     button.className = `btn ${selected.has(level) ? 'active' : ''}`;
     button.textContent = level;
     button.setAttribute('aria-pressed', String(selected.has(level)));
-    button.onclick = () => dispatch({ type: ACTIONS.TOGGLE_LEVEL_FILTER, value: level });
+    button.onclick = () => dispatch({ type: ACTIONS.TOGGLE_MAIN_LEVEL_FILTER, value: level });
     levelFilters.appendChild(button);
   });
 }
@@ -130,12 +139,12 @@ function renderTtsInfo() {
   ttsService.renderInfo(ttsInfo, state.tts, window.APP_VERSION || 'dev', labels.ttsInfo);
 }
 
-function renderModal(filteredItems) {
+function renderModal(modalFilteredItems) {
   const state = getState();
   const labels = getLabels();
-  const verbs = VERBS_LIST.buildVerbList(filteredItems, {
+  const verbs = VERBS_LIST.buildVerbList(modalFilteredItems, {
     uiLang: state.uiLang,
-    selectedLevels: getSelectedLevels(state),
+    selectedLevels: null,
     sortMode: state.verbsSortMode,
   });
 
@@ -143,12 +152,12 @@ function renderModal(filteredItems) {
     open: state.verbsModalOpen,
     labels,
     levels: AVAILABLE_LEVELS,
-    selectedLevels: getSelectedLevels(state),
+    selectedLevels: getSelectedModalLevels(state),
     sortMode: state.verbsSortMode,
     verbs,
     onClose: () => dispatch({ type: ACTIONS.CLOSE_VERBS_MODAL }),
     onSortToggle: () => dispatch({ type: ACTIONS.TOGGLE_VERBS_SORT }),
-    onLevelToggle: (level) => dispatch({ type: ACTIONS.TOGGLE_LEVEL_FILTER, value: level }),
+    onLevelToggle: (level) => dispatch({ type: ACTIONS.TOGGLE_MODAL_LEVEL_FILTER, value: level }),
   });
 }
 
@@ -164,13 +173,14 @@ function scheduleDispatch(action) {
 function renderApp() {
   const state = getState();
   const labels = getLabels();
-  const filteredItems = getFilteredItems(state);
+  const filteredItems = getMainFilteredItems(state);
+  const modalFilteredItems = getModalFilteredItems(state);
   const item = getCurrentItem(filteredItems, state);
 
   renderControls();
   renderLevelFilterButtons();
   renderTtsInfo();
-  renderModal(filteredItems);
+  renderModal(modalFilteredItems);
 
   if (!item) {
     renderEmptyState(main, labels);
@@ -190,7 +200,7 @@ function renderApp() {
       },
     });
 
-    if (state.tts && lastAutoSpokenCardId !== item.id) {
+    if (state.tts && !state.verbsModalOpen && lastAutoSpokenCardId !== item.id) {
       ttsService.speakSegments(getSpeakSegments(item, state.uiLang), true, { force: false });
       lastAutoSpokenCardId = item.id;
     }

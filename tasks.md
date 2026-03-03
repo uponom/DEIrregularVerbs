@@ -121,3 +121,10 @@
 - [x] 12.4 Make mode switch visually match language segmented control and stretch to full width.
 - [x] 12.5 Add/update tests for refined filtering/sorting/render hooks.
 - [x] 12.6 Run manual UI smoke regression via Chrome DevTools MCP.
+
+## 13) UI Bugfixes (Follow-up)
+- [x] 13.1 Ensure at least one level filter stays enabled (prevent empty selection state).
+- [x] 13.2 Split level filters: independent sets for cards (Learn/Quiz) and verbs modal.
+- [x] 13.3 Ensure modal filter interactions do not trigger auto-TTS card playback.
+- [x] 13.4 Add/update tests for reducer/filter behavior.
+- [x] 13.5 Run manual UI smoke regression via Chrome DevTools MCP.
