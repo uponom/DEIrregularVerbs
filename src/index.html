@@ -34,7 +34,7 @@
   .container { max-width: 920px; margin: 0 auto; padding: clamp(12px, 2.5vw, 24px); padding-bottom: calc(env(safe-area-inset-bottom,0) + 16px); }
   .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
   .controls-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .tts-toggle { display: flex; gap: 6px; align-items: center; }
+  .icon-btn { min-width: 44px; text-align: center; }
   .segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--inactive); }
   .segmented button { border: 0; background: transparent; padding: 10px 14px; font-weight: 600; cursor: pointer; min-width: 52px; }
   .segmented button.active { background: var(--primary); }
@@ -53,6 +53,7 @@
   .full-width { width: 100%; }
   .actions { display: flex; margin-top: 12px; }
   .actions-right { justify-content: flex-end; }
+  .actions-between { justify-content: space-between; }
 
   /* Learn mode */
   .flash-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
@@ -94,6 +95,78 @@
   .empty-title { margin: 0 0 12px; font-size: 24px; }
   .empty-body { margin: 0; color: var(--muted); }
 
+  /* Verbs modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 50;
+  }
+  .modal-dialog {
+    width: min(940px, 100%);
+    max-height: min(88vh, 900px);
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-title { margin: 0; font-size: 20px; }
+  .modal-actions { display: flex; gap: 8px; }
+  .modal-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-content {
+    overflow: auto;
+    padding: 12px 14px;
+    display: grid;
+    gap: 10px;
+  }
+  .modal-empty { margin: 6px 0; color: var(--muted); }
+  .verbs-row {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: grid;
+    gap: 6px;
+    background: #f9fafb;
+  }
+  .verbs-row-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .verbs-row-inf { font-size: 20px; }
+  .verbs-row-level { color: var(--muted); font-size: 13px; }
+  .verbs-row-forms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: #374151;
+  }
+  .verbs-row-translation {
+    border-top: 1px dashed #d1d5db;
+    padding-top: 6px;
+    font-weight: 600;
+  }
+
   /* TTS info */
   .tts-info { max-width: 920px; margin: 10px auto 24px; padding: 0 16px; }
   .tts-info .tiny { color: var(--muted); font-size: 12px; text-align: center; }
@@ -108,10 +181,8 @@
         <button type="button" data-lang="UA">UA</button>
         <button type="button" data-lang="RU" class="active">RU</button>
       </div>
-      <label class="tts-toggle">
-        <input id="ttsToggle" type="checkbox" />
-        <span id="ttsLabel" class="label">Speech (de-DE)</span>
-      </label>
+      <button type="button" id="ttsToggleBtn" class="btn icon-btn" aria-label="Toggle speech" title="Toggle speech">🔇</button>
+      <button type="button" id="openVerbsBtn" class="btn icon-btn" aria-label="Open verbs list" title="Open verbs list">📚</button>
     </div>
     <div class="controls-group" role="group" aria-label="Mode">
       <button type="button" id="modeLearn" class="btn active">Learn</button>
@@ -121,6 +192,7 @@
 
   <main id="main"></main>
 </div>
+<div id="verbsModalRoot"></div>
 
 <!-- Current TTS info -->
 <div class="tts-info"><div id="ttsInfo" class="tiny">TTS: —</div></div>
@@ -128,6 +200,7 @@
 <script src="./data/verbs.js"></script>
 <script src="./data/verb-schema.js"></script>
 <script src="./quiz-logic.js"></script>
+<script src="./verbs-list.js"></script>
 <script src="./app-version.js"></script>
 <script src="./pwa.js"></script>
 <script type="module" src="./index.js"></script>

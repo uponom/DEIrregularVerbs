@@ -97,3 +97,15 @@
 - [x] 10.3 Phase 3: safer rendering with reduced `innerHTML`.
 - [x] 10.4 Phase 4: CSS cleanup + a11y + UX polish.
 - [x] 10.5 After each phase, run manual regression for `Learn` and `Quiz` modes.
+
+## 11) UI Enhancements (Current)
+- [x] 11.1 Replace top TTS checkbox with an emoji-only toggle button.
+- [x] 11.2 Add a top-row emoji button that opens a modal with the full verbs list.
+- [x] 11.2.1 Modal list shows all verb forms and translation for the current UI language.
+- [x] 11.2.2 Default sort is by infinitive, with emoji-only toggle for sort-by-translation.
+- [x] 11.2.3 Add dynamic level filters in the modal (based on levels present in `src/data/verbs.js`).
+- [x] 11.3 Add a per-card speak button in Learn mode (works regardless of global TTS toggle).
+- [x] 11.4 Ensure bottom technical status line explicitly displays app version.
+- [x] 11.5 While speaking forms, also speak translation in the current UI language (with language switch).
+- [x] 11.6 Add/update automated tests for new UI logic (sorting/filtering/shell hooks).
+- [x] 11.7 Run manual UI smoke regression via Chrome DevTools MCP after implementation.

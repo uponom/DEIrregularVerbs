@@ -8,6 +8,9 @@ A single-page Progressive Web App (PWA) for learning German irregular verbs.
 - `Quiz` mode: step-by-step form selection from multiple options.
 - Translation languages: `RU`, `UA`, `EN`.
 - Full UI localization for `RU`, `UA`, `EN` (controls, quiz labels, status line, empty state).
+- Emoji-based top controls for auto-speech toggle and full verbs list modal.
+- Verbs list modal with dynamic CEFR level filters and sort toggle (infinitive/translation).
+- Per-card manual speak button in Learn mode (independent from auto-speech toggle).
 - Optional text-to-speech via Web Speech API (`de-DE`).
 - Centralized state transitions via `dispatch(action)`.
 - Accessibility improvements (`aria-pressed` toggles, non-color quiz feedback markers).
@@ -87,12 +90,14 @@ npm run validate:data
 │  └─ i18n.js
 │  └─ state.js
 │  └─ quiz-logic.js
+│  └─ verbs-list.js
 │  └─ data/
 │     └─ verbs.js
 │     └─ verb-schema.js
 │  └─ ui/
 │     ├─ learn.js
 │     └─ quiz.js
+│     └─ verbs-modal.js
 │  └─ services/
 │     └─ tts.js
 │  └─ manifest.webmanifest
@@ -107,6 +112,7 @@ npm run validate:data
 ├─ tests/
 │  └─ app-smoke.test.js
 │  └─ quiz-logic.test.js
+│  └─ verbs-list.test.js
 │  └─ validate-verbs.test.js
 │  └─ verb-schema.test.js
 │  └─ pwa.test.js
@@ -182,11 +188,13 @@ The browser runtime is split into ES modules:
 - `src/state.js`: state shape and transition helpers;
 - `src/ui/learn.js`: learn-mode rendering;
 - `src/ui/quiz.js`: quiz-mode rendering and option generation;
+- `src/ui/verbs-modal.js`: modal rendering for full verbs list;
 - `src/services/tts.js`: TTS voice selection, speaking, and footer info rendering.
 
 Additional shared UMD module:
 
 - `src/quiz-logic.js`: pure quiz logic (`makeSmartOptions`, quiz stage transitions), reused by tests.
+- `src/verbs-list.js`: verbs list helpers (levels, filtering, sorting, translation projection), reused by tests.
 
 ## State Flow
 
@@ -200,6 +208,7 @@ The project currently includes:
 
 - app shell initialization smoke test: `tests/app-smoke.test.js`;
 - quiz logic tests (`makeSmartOptions`, quiz transitions): `tests/quiz-logic.test.js`;
+- verbs list logic tests (sorting/filtering/levels): `tests/verbs-list.test.js`;
 - dataset validation tests: `tests/validate-verbs.test.js`;
 - PWA registration and helper logic tests: `tests/pwa.test.js`.
 - app version format/runtime tests: `tests/app-version.test.js`.

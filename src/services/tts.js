@@ -61,6 +61,38 @@ export function createTtsService() {
     }
   }
 
+  function speakSegments(segments, enabled, options) {
+    const force = Boolean(options && options.force);
+    if (!force && !enabled) return;
+    if (!hasApi()) return;
+
+    const queue = (segments || [])
+      .map((segment) => ({
+        text: String(segment?.text || '').trim(),
+        lang: segment?.lang || 'de-DE',
+      }))
+      .filter((segment) => segment.text);
+
+    if (!queue.length) return;
+
+    try {
+      window.speechSynthesis.cancel();
+      for (const segment of queue) {
+        const utterance = new SpeechSynthesisUtterance(segment.text);
+        utterance.lang = segment.lang;
+        if (/^de[-_]/i.test(segment.lang) && state.deVoice) {
+          utterance.voice = state.deVoice;
+        }
+        utterance.rate = TTS_RATE;
+        utterance.pitch = TTS_PITCH;
+        window.speechSynthesis.speak(utterance);
+      }
+      state.lastError = null;
+    } catch (_err) {
+      state.lastError = 'SPEAK_FAILED';
+    }
+  }
+
   function renderInfo(target, enabled, version, labels) {
     if (!target) return;
 
@@ -104,6 +136,7 @@ export function createTtsService() {
     init,
     pickGermanVoice,
     renderInfo,
+    speakSegments,
     speakSequence,
   };
 }

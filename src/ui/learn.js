@@ -6,7 +6,7 @@ function createElement(tag, className, text) {
 }
 
 export function renderLearn(main, params) {
-  const { item, translation, labels, fallback, onNext } = params;
+  const { item, translation, labels, fallback, onNext, onSpeakCard } = params;
 
   const card = createElement('section', 'card');
   const flash = createElement('div', 'flash-grid');
@@ -49,7 +49,15 @@ export function renderLearn(main, params) {
   translationLine.appendChild(translationValue);
   flash.appendChild(translationLine);
 
-  const actions = createElement('div', 'actions actions-right');
+  const actions = createElement('div', 'actions actions-between');
+  const speakButton = createElement('button', 'btn icon-btn', '🔊');
+  speakButton.id = 'speakCardBtn';
+  speakButton.type = 'button';
+  speakButton.title = labels.controls.cardSpeakAria;
+  speakButton.setAttribute('aria-label', labels.controls.cardSpeakAria);
+  speakButton.onclick = onSpeakCard;
+  actions.appendChild(speakButton);
+
   const nextButton = createElement('button', 'btn btn-green', labels.next);
   nextButton.id = 'nextBtn';
   nextButton.type = 'button';

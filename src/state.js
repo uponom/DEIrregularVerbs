@@ -4,6 +4,11 @@ export const ACTIONS = {
   SET_MODE: 'SET_MODE',
   SET_UI_LANG: 'SET_UI_LANG',
   SET_TTS: 'SET_TTS',
+  TOGGLE_TTS: 'TOGGLE_TTS',
+  OPEN_VERBS_MODAL: 'OPEN_VERBS_MODAL',
+  CLOSE_VERBS_MODAL: 'CLOSE_VERBS_MODAL',
+  TOGGLE_VERBS_SORT: 'TOGGLE_VERBS_SORT',
+  SET_VERBS_LEVEL_FILTER: 'SET_VERBS_LEVEL_FILTER',
   QUIZ_RESET: 'QUIZ_RESET',
   QUIZ_SET_DE: 'QUIZ_SET_DE',
   QUIZ_SET_PRET: 'QUIZ_SET_PRET',
@@ -21,6 +26,9 @@ export function createInitialState() {
     tts: false,
     index: 0,
     q: createQuizProgress(),
+    verbsModalOpen: false,
+    verbsSortMode: 'infinitive',
+    verbsLevelFilter: 'ALL',
   };
 }
 
@@ -37,6 +45,7 @@ export function createItems(rawVerbs, normalizer) {
   const normalized = normalizer ? normalizer(rawVerbs) : [];
   const mapped = normalized.map((v) => ({
     id: v.id,
+    level: v.level,
     ru: v.translations.ru,
     ua: v.translations.ua,
     en: v.translations.en,
@@ -92,6 +101,31 @@ export function reduceState(state, action, context) {
       return {
         ...currentState,
         tts: Boolean(action.value),
+      };
+    case ACTIONS.TOGGLE_TTS:
+      return {
+        ...currentState,
+        tts: !currentState.tts,
+      };
+    case ACTIONS.OPEN_VERBS_MODAL:
+      return {
+        ...currentState,
+        verbsModalOpen: true,
+      };
+    case ACTIONS.CLOSE_VERBS_MODAL:
+      return {
+        ...currentState,
+        verbsModalOpen: false,
+      };
+    case ACTIONS.TOGGLE_VERBS_SORT:
+      return {
+        ...currentState,
+        verbsSortMode: currentState.verbsSortMode === 'infinitive' ? 'translation' : 'infinitive',
+      };
+    case ACTIONS.SET_VERBS_LEVEL_FILTER:
+      return {
+        ...currentState,
+        verbsLevelFilter: action.value || 'ALL',
       };
     case ACTIONS.QUIZ_RESET:
       return {
