@@ -109,3 +109,15 @@
 - [x] 11.5 While speaking forms, also speak translation in the current UI language (with language switch).
 - [x] 11.6 Add/update automated tests for new UI logic (sorting/filtering/shell hooks).
 - [x] 11.7 Run manual UI smoke regression via Chrome DevTools MCP after implementation.
+
+## 12) UI Refinement (Requested)
+- [x] 12.1 Fix auto-TTS in Learn mode to trigger only when a new card is shown.
+- [x] 12.2 Verbs modal layout updates.
+- [x] 12.2.1 Right-align translation and use the same font size as infinitive.
+- [x] 12.2.2 Render `Präteritum / Partizip II` with bold forms and slash separator, keeping auxiliary verbs non-bold.
+- [x] 12.2.3 Replace single-level modal filter with multi-select level buttons (no `All` button, default all selected).
+- [x] 12.3 Add the same level filtering for Learn and Quiz modes.
+- [x] 12.3.1 Place the level filter row under language controls.
+- [x] 12.4 Make mode switch visually match language segmented control and stretch to full width.
+- [x] 12.5 Add/update tests for refined filtering/sorting/render hooks.
+- [x] 12.6 Run manual UI smoke regression via Chrome DevTools MCP.

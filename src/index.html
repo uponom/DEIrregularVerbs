@@ -32,12 +32,16 @@
   }
   /* Controls */
   .container { max-width: 920px; margin: 0 auto; padding: clamp(12px, 2.5vw, 24px); padding-bottom: calc(env(safe-area-inset-bottom,0) + 16px); }
-  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .controls { display: grid; gap: 10px; margin-bottom: 12px; }
+  .controls-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
   .controls-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .icon-btn { min-width: 44px; text-align: center; }
   .segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--inactive); }
   .segmented button { border: 0; background: transparent; padding: 10px 14px; font-weight: 600; cursor: pointer; min-width: 52px; }
   .segmented button.active { background: var(--primary); }
+  .segmented-wide { display: flex; width: 100%; }
+  .segmented-wide button { flex: 1; text-align: center; }
+  .level-filters { display: flex; flex-wrap: wrap; gap: 8px; }
   .btn { padding: 10px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--inactive); cursor: pointer; font-weight: 600; }
   .btn.active { background: var(--primary); }
   .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
@@ -161,10 +165,15 @@
     gap: 10px;
     color: #374151;
   }
+  .verbs-row-pras { color: #4b5563; }
+  .verbs-row-sep { color: #6b7280; }
+  .verbs-row-aux { font-weight: 400; color: #4b5563; }
   .verbs-row-translation {
     border-top: 1px dashed #d1d5db;
     padding-top: 6px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: right;
   }
 
   /* TTS info */
@@ -175,18 +184,21 @@
 <body>
 <div class="container">
   <div class="controls">
-    <div class="controls-group">
-      <div class="segmented" id="langGroup" role="group" aria-label="Language">
-        <button type="button" data-lang="EN">EN</button>
-        <button type="button" data-lang="UA">UA</button>
-        <button type="button" data-lang="RU" class="active">RU</button>
+    <div class="controls-top">
+      <div class="controls-group">
+        <div class="segmented" id="langGroup" role="group" aria-label="Language">
+          <button type="button" data-lang="EN">EN</button>
+          <button type="button" data-lang="UA">UA</button>
+          <button type="button" data-lang="RU" class="active">RU</button>
+        </div>
+        <button type="button" id="ttsToggleBtn" class="btn icon-btn" aria-label="Toggle speech" title="Toggle speech">🔇</button>
+        <button type="button" id="openVerbsBtn" class="btn icon-btn" aria-label="Open verbs list" title="Open verbs list">📚</button>
       </div>
-      <button type="button" id="ttsToggleBtn" class="btn icon-btn" aria-label="Toggle speech" title="Toggle speech">🔇</button>
-      <button type="button" id="openVerbsBtn" class="btn icon-btn" aria-label="Open verbs list" title="Open verbs list">📚</button>
     </div>
-    <div class="controls-group" role="group" aria-label="Mode">
-      <button type="button" id="modeLearn" class="btn active">Learn</button>
-      <button type="button" id="modeQuiz" class="btn">Quiz</button>
+    <div id="levelFilters" class="level-filters" role="group" aria-label="Level filters"></div>
+    <div id="modeGroup" class="segmented segmented-wide" role="group" aria-label="Mode">
+      <button type="button" id="modeLearn" class="active">Learn</button>
+      <button type="button" id="modeQuiz">Quiz</button>
     </div>
   </div>
 

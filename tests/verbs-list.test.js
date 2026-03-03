@@ -52,17 +52,22 @@ test('getAvailableLevels returns sorted unique levels', () => {
 });
 
 test('buildVerbList sorts by infinitive by default', () => {
-  const list = buildVerbList(SAMPLE, { uiLang: 'RU', level: 'ALL', sortMode: SORT_MODES.INFINITIVE });
+  const list = buildVerbList(SAMPLE, { uiLang: 'RU', selectedLevels: null, sortMode: SORT_MODES.INFINITIVE });
   assert.deepEqual(list.map((x) => x.de), ['essen', 'lesen', 'werden']);
 });
 
 test('buildVerbList sorts by translation for active UI language', () => {
-  const list = buildVerbList(SAMPLE, { uiLang: 'EN', level: 'ALL', sortMode: SORT_MODES.TRANSLATION });
+  const list = buildVerbList(SAMPLE, { uiLang: 'EN', selectedLevels: null, sortMode: SORT_MODES.TRANSLATION });
   assert.deepEqual(list.map((x) => x.translation), ['become', 'eat', 'read']);
 });
 
-test('buildVerbList filters by selected level', () => {
-  const list = buildVerbList(SAMPLE, { uiLang: 'RU', level: 'A1', sortMode: SORT_MODES.INFINITIVE });
+test('buildVerbList filters by selected levels', () => {
+  const list = buildVerbList(SAMPLE, { uiLang: 'RU', selectedLevels: ['A1'], sortMode: SORT_MODES.INFINITIVE });
   assert.equal(list.length, 1);
   assert.equal(list[0].de, 'essen');
+});
+
+test('buildVerbList returns no rows when selected levels are empty', () => {
+  const list = buildVerbList(SAMPLE, { uiLang: 'RU', selectedLevels: [], sortMode: SORT_MODES.INFINITIVE });
+  assert.equal(list.length, 0);
 });

@@ -25,6 +25,19 @@
     return (items || []).filter((item) => item.level === level);
   }
 
+  function filterByLevels(items, selectedLevels, availableLevels) {
+    const list = items || [];
+    const levels = availableLevels || getAvailableLevels(list);
+    if (selectedLevels === null || selectedLevels === undefined) {
+      return list.slice();
+    }
+    const selected = Array.isArray(selectedLevels) ? selectedLevels : [];
+    if (!selected.length) return [];
+    if (selected.length === levels.length) return list.slice();
+    const selectedSet = new Set(selected);
+    return list.filter((item) => selectedSet.has(item.level));
+  }
+
   function sortItems(items, sortMode, uiLang) {
     const copy = (items || []).slice();
     const mode = sortMode || SORT_MODES.INFINITIVE;
@@ -39,9 +52,9 @@
   function buildVerbList(items, options) {
     const safeOptions = options || {};
     const uiLang = safeOptions.uiLang || 'RU';
-    const level = safeOptions.level || 'ALL';
     const sortMode = safeOptions.sortMode || SORT_MODES.INFINITIVE;
-    const filtered = filterByLevel(items, level);
+    const levels = getAvailableLevels(items || []);
+    const filtered = filterByLevels(items, safeOptions.selectedLevels, levels);
     return sortItems(filtered, sortMode, uiLang).map((item) => ({
       id: item.id,
       level: item.level,
@@ -58,6 +71,7 @@
     SORT_MODES,
     buildVerbList,
     filterByLevel,
+    filterByLevels,
     getAvailableLevels,
     pickTranslation,
     sortItems,

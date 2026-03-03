@@ -10,8 +10,12 @@ A single-page Progressive Web App (PWA) for learning German irregular verbs.
 - Full UI localization for `RU`, `UA`, `EN` (controls, quiz labels, status line, empty state).
 - Emoji-based top controls for auto-speech toggle and full verbs list modal.
 - Verbs list modal with dynamic CEFR level filters and sort toggle (infinitive/translation).
+- Shared dynamic CEFR level filters for Learn, Quiz, and verbs list modal.
+- Full-width segmented mode switch (`Learn` / `Quiz`) aligned with language switch style.
 - Per-card manual speak button in Learn mode (independent from auto-speech toggle).
 - Optional text-to-speech via Web Speech API (`de-DE`).
+- TTS speaks German forms and then translation in the active UI language (`RU`/`UA`/`EN`).
+- Auto-TTS in Learn mode triggers only when a new card is shown.
 - Centralized state transitions via `dispatch(action)`.
 - Accessibility improvements (`aria-pressed` toggles, non-color quiz feedback markers).
 - Installable PWA with app manifest and service worker.
@@ -189,7 +193,7 @@ The browser runtime is split into ES modules:
 - `src/ui/learn.js`: learn-mode rendering;
 - `src/ui/quiz.js`: quiz-mode rendering and option generation;
 - `src/ui/verbs-modal.js`: modal rendering for full verbs list;
-- `src/services/tts.js`: TTS voice selection, speaking, and footer info rendering.
+- `src/services/tts.js`: TTS voice selection, multi-language segmented speaking, and footer info rendering.
 
 Additional shared UMD module:
 

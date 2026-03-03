@@ -15,32 +15,46 @@ import { createTtsService } from './services/tts.js';
 const VERBS = Array.isArray(window.VERBS) ? window.VERBS : [];
 const NORMALIZE_RECORDS = window.VerbSchema?.normalizeVerbRecords;
 const ITEMS = createItems(VERBS, NORMALIZE_RECORDS);
-const HAS_QUIZABLE_ITEMS = ITEMS.some((item) => item.de && item.pret && item.part2);
 const VERBS_LIST = window.VerbsList || {
-  SORT_MODES: { INFINITIVE: 'infinitive' },
   buildVerbList: () => [],
+  filterByLevels: (items) => items.slice(),
   getAvailableLevels: () => [],
 };
 
 const main = document.getElementById('main');
 const ttsInfo = document.getElementById('ttsInfo');
 const langGroup = document.getElementById('langGroup');
+const levelFilters = document.getElementById('levelFilters');
 const modeLearnButton = document.getElementById('modeLearn');
 const modeQuizButton = document.getElementById('modeQuiz');
 const ttsToggleButton = document.getElementById('ttsToggleBtn');
 const openVerbsButton = document.getElementById('openVerbsBtn');
 const verbsModalRoot = document.getElementById('verbsModalRoot');
 const ttsService = createTtsService();
+const AVAILABLE_LEVELS = VERBS_LIST.getAvailableLevels(ITEMS);
 
-const store = createStore(createInitialState(), () => ({ itemsLength: ITEMS.length }));
+let store;
+let lastAutoSpokenCardId = null;
+
+function getSelectedLevels(state) {
+  if (Array.isArray(state.selectedLevels)) return state.selectedLevels;
+  return AVAILABLE_LEVELS.slice();
+}
+
+function getFilteredItems(state) {
+  return VERBS_LIST.filterByLevels(ITEMS, state.selectedLevels, AVAILABLE_LEVELS);
+}
+
+store = createStore(createInitialState(), () => ({ itemsLength: getFilteredItems(store.getState()).length, levels: AVAILABLE_LEVELS }));
 
 function getState() {
   return store.getState();
 }
 
-function getCurrentItem() {
-  const state = getState();
-  return ITEMS[state.index];
+function getCurrentItem(filteredItems, state) {
+  if (!filteredItems.length) return null;
+  const idx = state.index % filteredItems.length;
+  return filteredItems[idx];
 }
 
 function getLabels() {
@@ -95,32 +109,46 @@ function renderControls() {
   });
 }
 
+function renderLevelFilterButtons() {
+  const state = getState();
+  const selected = new Set(getSelectedLevels(state));
+  levelFilters.replaceChildren();
+  AVAILABLE_LEVELS.forEach((level) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `btn ${selected.has(level) ? 'active' : ''}`;
+    button.textContent = level;
+    button.setAttribute('aria-pressed', String(selected.has(level)));
+    button.onclick = () => dispatch({ type: ACTIONS.TOGGLE_LEVEL_FILTER, value: level });
+    levelFilters.appendChild(button);
+  });
+}
+
 function renderTtsInfo() {
   const state = getState();
   const labels = getLabels();
   ttsService.renderInfo(ttsInfo, state.tts, window.APP_VERSION || 'dev', labels.ttsInfo);
 }
 
-function renderModal() {
+function renderModal(filteredItems) {
   const state = getState();
   const labels = getLabels();
-  const levels = VERBS_LIST.getAvailableLevels(ITEMS);
-  const verbs = VERBS_LIST.buildVerbList(ITEMS, {
+  const verbs = VERBS_LIST.buildVerbList(filteredItems, {
     uiLang: state.uiLang,
-    level: state.verbsLevelFilter,
+    selectedLevels: getSelectedLevels(state),
     sortMode: state.verbsSortMode,
   });
 
   renderVerbsModal(verbsModalRoot, {
     open: state.verbsModalOpen,
     labels,
-    levels,
-    activeLevel: state.verbsLevelFilter,
+    levels: AVAILABLE_LEVELS,
+    selectedLevels: getSelectedLevels(state),
     sortMode: state.verbsSortMode,
     verbs,
     onClose: () => dispatch({ type: ACTIONS.CLOSE_VERBS_MODAL }),
     onSortToggle: () => dispatch({ type: ACTIONS.TOGGLE_VERBS_SORT }),
-    onLevelSelect: (level) => dispatch({ type: ACTIONS.SET_VERBS_LEVEL_FILTER, value: level }),
+    onLevelToggle: (level) => dispatch({ type: ACTIONS.TOGGLE_LEVEL_FILTER, value: level }),
   });
 }
 
@@ -136,13 +164,17 @@ function scheduleDispatch(action) {
 function renderApp() {
   const state = getState();
   const labels = getLabels();
-  const item = getCurrentItem();
+  const filteredItems = getFilteredItems(state);
+  const item = getCurrentItem(filteredItems, state);
+
   renderControls();
+  renderLevelFilterButtons();
   renderTtsInfo();
-  renderModal();
+  renderModal(filteredItems);
 
   if (!item) {
     renderEmptyState(main, labels);
+    lastAutoSpokenCardId = null;
     return;
   }
 
@@ -157,15 +189,19 @@ function renderApp() {
         ttsService.speakSegments(getSpeakSegments(item, state.uiLang), state.tts, { force: true });
       },
     });
-    if (state.tts) {
+
+    if (state.tts && lastAutoSpokenCardId !== item.id) {
       ttsService.speakSegments(getSpeakSegments(item, state.uiLang), true, { force: false });
+      lastAutoSpokenCardId = item.id;
     }
     return;
   }
 
+  lastAutoSpokenCardId = null;
+  const hasQuizableItems = filteredItems.some((entry) => entry.de && entry.pret && entry.part2);
   const canQuizForms = item.de && item.pret && item.part2;
   if (!canQuizForms) {
-    if (!HAS_QUIZABLE_ITEMS || ITEMS.length <= 1) {
+    if (!hasQuizableItems || filteredItems.length <= 1) {
       renderEmptyState(main, labels);
       return;
     }
@@ -188,14 +224,14 @@ function renderApp() {
       ttsService.speakSegments([{ text: value, lang: 'de-DE' }], state.tts, { force: false });
       scheduleDispatch({ type: ACTIONS.QUIZ_SET_PRET, value });
     },
-    onPickP2: (value) => {
+    onPickP2: () => {
       ttsService.speakSegments(getSpeakSegments(item, state.uiLang), state.tts, { force: false });
-      scheduleDispatch({ type: ACTIONS.QUIZ_SET_P2, value });
+      scheduleDispatch({ type: ACTIONS.QUIZ_SET_P2, value: item.part2 });
     },
     onNextItem: () => {
       dispatch({ type: ACTIONS.NEXT_ITEM_AND_RESET_QUIZ });
     },
-    getOptions: (key, correctItem) => makeSmartOptions(ITEMS, key, correctItem, 5, shuffle),
+    getOptions: (key, correctItem) => makeSmartOptions(filteredItems, key, correctItem, 5, shuffle),
   });
 }
 

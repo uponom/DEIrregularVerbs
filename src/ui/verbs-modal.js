@@ -13,9 +13,17 @@ function buildVerbRow(verb, fallback) {
   row.appendChild(head);
 
   const forms = createElement('div', 'verbs-row-forms');
-  forms.appendChild(createElement('span', '', verb.pras ? `(${verb.pras})` : ''));
-  forms.appendChild(createElement('span', '', verb.pret || fallback));
-  forms.appendChild(createElement('span', '', `${verb.aux || ''} ${verb.part2 || fallback}`.trim()));
+  if (verb.pras) {
+    forms.appendChild(createElement('span', 'verbs-row-pras', `(${verb.pras})`));
+  }
+  forms.appendChild(createElement('strong', 'verbs-row-pret', verb.pret || fallback));
+  forms.appendChild(createElement('span', 'verbs-row-sep', '/'));
+  const part = createElement('span', 'verbs-row-part');
+  if (verb.aux) {
+    part.appendChild(createElement('span', 'verbs-row-aux', `${verb.aux} `));
+  }
+  part.appendChild(createElement('strong', 'verbs-row-part2', verb.part2 || fallback));
+  forms.appendChild(part);
   row.appendChild(forms);
 
   row.appendChild(createElement('div', 'verbs-row-translation', verb.translation || fallback));
@@ -27,12 +35,12 @@ export function renderVerbsModal(root, params) {
     open,
     labels,
     levels,
-    activeLevel,
+    selectedLevels,
     sortMode,
     verbs,
     onClose,
     onSortToggle,
-    onLevelSelect,
+    onLevelToggle,
   } = params;
 
   root.replaceChildren();
@@ -70,14 +78,13 @@ export function renderVerbsModal(root, params) {
   dialog.appendChild(header);
 
   const filters = createElement('div', 'modal-filters');
-  const allButton = createElement('button', `btn ${activeLevel === 'ALL' ? 'active' : ''}`, labels.verbsModal.allLevels);
-  allButton.type = 'button';
-  allButton.onclick = () => onLevelSelect('ALL');
-  filters.appendChild(allButton);
+  const selectedSet = new Set(
+    Array.isArray(selectedLevels) ? selectedLevels : levels
+  );
   levels.forEach((level) => {
-    const button = createElement('button', `btn ${activeLevel === level ? 'active' : ''}`, level);
+    const button = createElement('button', `btn ${selectedSet.has(level) ? 'active' : ''}`, level);
     button.type = 'button';
-    button.onclick = () => onLevelSelect(level);
+    button.onclick = () => onLevelToggle(level);
     filters.appendChild(button);
   });
   dialog.appendChild(filters);
