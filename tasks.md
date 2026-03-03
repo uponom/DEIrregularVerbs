@@ -92,8 +92,8 @@
 - [x] 9.2 Add a smoke test for app initialization.
 
 ## 10) Incremental Delivery Plan
-- [ ] 10.1 Phase 1: data extraction + deduplication + validation.
-- [ ] 10.2 Phase 2: module decomposition (`state`, `ui`, `tts`).
-- [ ] 10.3 Phase 3: safer rendering with reduced `innerHTML`.
-- [ ] 10.4 Phase 4: CSS cleanup + a11y + UX polish.
-- [ ] 10.5 After each phase, run manual regression for `Learn` and `Quiz` modes.
+- [x] 10.1 Phase 1: data extraction + deduplication + validation.
+- [x] 10.2 Phase 2: module decomposition (`state`, `ui`, `tts`).
+- [x] 10.3 Phase 3: safer rendering with reduced `innerHTML`.
+- [x] 10.4 Phase 4: CSS cleanup + a11y + UX polish.
+- [x] 10.5 After each phase, run manual regression for `Learn` and `Quiz` modes.
