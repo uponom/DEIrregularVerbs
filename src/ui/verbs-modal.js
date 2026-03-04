@@ -132,7 +132,7 @@ export function renderVerbsModal(root, params) {
     button.onclick = () => onLevelToggle(level);
     filters.appendChild(button);
   });
-  const parentButton = createElement('button', `btn icon-btn ${modalParentOnly ? 'active' : ''}`, '🌱');
+  const parentButton = createElement('button', `btn icon-btn modal-parent-btn ${modalParentOnly ? 'active' : ''}`, '🌱');
   parentButton.type = 'button';
   parentButton.title = modalParentOnly ? labels.controls.modalParentOnlyOnAria : labels.controls.modalParentOnlyOffAria;
   parentButton.setAttribute('aria-label', parentButton.title);

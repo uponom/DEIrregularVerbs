@@ -40,6 +40,7 @@ const CHILDREN_MAP = createChildrenMap(ITEMS);
 
 let store;
 let lastAutoSpokenCardId = null;
+let modalScrollTop = 0;
 
 function getSelectedMainLevels(state) {
   if (Array.isArray(state.selectedMainLevels)) return state.selectedMainLevels;
@@ -170,17 +171,34 @@ function renderModal(modalFilteredItems) {
     sortMode: state.verbsSortMode,
     verbs,
     onClose: () => dispatch({ type: ACTIONS.CLOSE_VERBS_MODAL }),
-    onSortToggle: () => dispatch({ type: ACTIONS.TOGGLE_VERBS_SORT }),
-    onLevelToggle: (level) => dispatch({ type: ACTIONS.TOGGLE_MODAL_LEVEL_FILTER, value: level }),
-    onModalParentOnlyToggle: () => dispatch({ type: ACTIONS.TOGGLE_MODAL_PARENT_ONLY }),
+    onSortToggle: () => dispatchPreserveModalScroll({ type: ACTIONS.TOGGLE_VERBS_SORT }),
+    onLevelToggle: (level) => dispatchPreserveModalScroll({ type: ACTIONS.TOGGLE_MODAL_LEVEL_FILTER, value: level }),
+    onModalParentOnlyToggle: () => dispatchPreserveModalScroll({ type: ACTIONS.TOGGLE_MODAL_PARENT_ONLY }),
     getChildRows: (parentId) => createChildRows(CHILDREN_MAP, parentId, state.uiLang),
-    onVerbToggle: (parentId) => dispatch({ type: ACTIONS.TOGGLE_MODAL_PARENT_EXPANDED, value: parentId }),
+    onVerbToggle: (parentId) => dispatchPreserveModalScroll({ type: ACTIONS.TOGGLE_MODAL_PARENT_EXPANDED, value: parentId }),
   });
 }
 
 function dispatch(action) {
   store.dispatch(action);
   renderApp();
+}
+
+function captureModalScroll() {
+  const content = verbsModalRoot.querySelector('.modal-content');
+  modalScrollTop = content ? content.scrollTop : 0;
+}
+
+function restoreModalScroll() {
+  const content = verbsModalRoot.querySelector('.modal-content');
+  if (!content) return;
+  content.scrollTop = modalScrollTop;
+}
+
+function dispatchPreserveModalScroll(action) {
+  captureModalScroll();
+  dispatch(action);
+  restoreModalScroll();
 }
 
 function scheduleDispatch(action) {

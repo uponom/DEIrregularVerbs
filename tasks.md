@@ -157,3 +157,9 @@
 - [x] 16.2 Restrict black/gray color scheme only to controls above the card.
 - [x] 16.3 Keep card and modal buttons on default styling.
 - [x] 16.4 Set white borders for top control buttons.
+
+## 17) Modal UX and Style Fixes
+- [x] 17.1 Set white background for the card speak button.
+- [x] 17.2 Right-align Parent-Children toggle button in modal filters row.
+- [x] 17.3 Preserve modal scroll position when expanding/collapsing parent rows.
+- [x] 17.4 Set white background for modal sort and close buttons.
