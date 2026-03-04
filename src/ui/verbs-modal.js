@@ -5,8 +5,32 @@ function createElement(tag, className, text) {
   return element;
 }
 
-function buildVerbRow(verb, fallback) {
+function buildChildRow(child, fallback) {
+  const row = createElement('tr', 'modal-child-row');
+  row.appendChild(createElement('td', 'modal-child-inf', child.de || fallback));
+  row.appendChild(createElement('td', 'modal-child-tr', child.translation || fallback));
+  return row;
+}
+
+function buildVerbRow(verb, fallback, options) {
+  const { modalParentOnly, isExpanded, childRows, labels, onVerbToggle } = options;
   const row = createElement('article', 'verbs-row');
+  const canExpand = modalParentOnly && childRows.length > 0;
+  if (canExpand) {
+    row.classList.add('verbs-row-clickable');
+    row.setAttribute('role', 'button');
+    row.setAttribute('tabindex', '0');
+    row.setAttribute('aria-expanded', String(Boolean(isExpanded)));
+    row.setAttribute('aria-label', labels.parentChildren.modalExpandAria);
+    row.onclick = () => onVerbToggle(verb.id);
+    row.onkeydown = (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        onVerbToggle(verb.id);
+      }
+    };
+  }
+
   const head = createElement('div', 'verbs-row-head');
   head.appendChild(createElement('strong', 'verbs-row-inf', verb.de || fallback));
   head.appendChild(createElement('span', 'verbs-row-level', verb.level || fallback));
@@ -27,6 +51,21 @@ function buildVerbRow(verb, fallback) {
   row.appendChild(forms);
 
   row.appendChild(createElement('div', 'verbs-row-translation', verb.translation || fallback));
+
+  if (canExpand && isExpanded) {
+    const wrap = createElement('div', 'modal-child-wrap');
+    if (!childRows.length) {
+      wrap.appendChild(createElement('p', 'modal-child-empty', labels.parentChildren.empty));
+    } else {
+      const table = createElement('table', 'modal-child-table');
+      const body = createElement('tbody', '');
+      childRows.forEach((child) => body.appendChild(buildChildRow(child, fallback)));
+      table.appendChild(body);
+      wrap.appendChild(table);
+    }
+    row.appendChild(wrap);
+  }
+
   return row;
 }
 
@@ -36,11 +75,16 @@ export function renderVerbsModal(root, params) {
     labels,
     levels,
     selectedLevels,
+    modalParentOnly,
+    expandedModalParentId,
     sortMode,
     verbs,
     onClose,
     onSortToggle,
     onLevelToggle,
+    onModalParentOnlyToggle,
+    getChildRows,
+    onVerbToggle,
   } = params;
 
   root.replaceChildren();
@@ -84,16 +128,33 @@ export function renderVerbsModal(root, params) {
   levels.forEach((level) => {
     const button = createElement('button', `btn ${selectedSet.has(level) ? 'active' : ''}`, level);
     button.type = 'button';
+    button.setAttribute('aria-pressed', String(selectedSet.has(level)));
     button.onclick = () => onLevelToggle(level);
     filters.appendChild(button);
   });
+  const parentButton = createElement('button', `btn icon-btn ${modalParentOnly ? 'active' : ''}`, '🌱');
+  parentButton.type = 'button';
+  parentButton.title = modalParentOnly ? labels.controls.modalParentOnlyOnAria : labels.controls.modalParentOnlyOffAria;
+  parentButton.setAttribute('aria-label', parentButton.title);
+  parentButton.setAttribute('aria-pressed', String(modalParentOnly));
+  parentButton.onclick = onModalParentOnlyToggle;
+  filters.appendChild(parentButton);
   dialog.appendChild(filters);
 
   const content = createElement('div', 'modal-content');
   if (!verbs.length) {
     content.appendChild(createElement('p', 'modal-empty', labels.verbsModal.empty));
   } else {
-    verbs.forEach((verb) => content.appendChild(buildVerbRow(verb, labels.fallback)));
+    verbs.forEach((verb) => {
+      const childRows = getChildRows ? getChildRows(verb.id) : [];
+      content.appendChild(buildVerbRow(verb, labels.fallback, {
+        modalParentOnly,
+        isExpanded: expandedModalParentId === verb.id,
+        childRows,
+        labels,
+        onVerbToggle,
+      }));
+    });
   }
   dialog.appendChild(content);
 

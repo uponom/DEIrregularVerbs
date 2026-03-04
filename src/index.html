@@ -18,8 +18,8 @@
     --text: #111;
     --muted: #666;
     --border: #e5e5e5;
-    --primary: #ffffff;  /* active buttons */
-    --inactive: #9aa0a6; /* inactive buttons */
+    --primary: #6b7280;  /* active buttons */
+    --inactive: #000000; /* inactive buttons */
     --green: #16a34a;    /* "Next" button */
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -36,13 +36,15 @@
   .controls-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
   .controls-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .icon-btn { min-width: 44px; text-align: center; }
-  .segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--inactive); }
-  .segmented button { border: 0; background: transparent; padding: 10px 14px; font-weight: 600; cursor: pointer; min-width: 52px; }
+  .segmented { display: inline-flex; border: 1px solid #1f2937; border-radius: 14px; overflow: hidden; background: var(--inactive); }
+  .segmented button { border: 0; color: #fff; background: transparent; padding: 10px 14px; font-weight: 600; cursor: pointer; min-width: 52px; }
   .segmented button.active { background: var(--primary); }
   .segmented-wide { display: flex; width: 100%; }
   .segmented-wide button { flex: 1; text-align: center; }
   .level-filters { display: flex; flex-wrap: wrap; gap: 8px; }
-  .btn { padding: 10px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--inactive); cursor: pointer; font-weight: 600; }
+  .level-row { display: flex; gap: 8px; align-items: center; }
+  .level-row .level-filters { flex: 1; }
+  .btn { padding: 10px 14px; border-radius: 14px; border: 1px solid #1f2937; background: var(--inactive); color: #fff; cursor: pointer; font-weight: 600; }
   .btn.active { background: var(--primary); }
   .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
 
@@ -60,9 +62,10 @@
   .actions-between { justify-content: space-between; }
   .child-list-wrap { margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 12px; }
   .child-list-title { margin: 0 0 8px; font-size: 16px; }
-  .child-list-empty { margin: 0; color: var(--muted); font-size: 14px; }
-  .child-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
-  .child-list-item { font-size: 16px; }
+  .child-table { width: 100%; border-collapse: collapse; }
+  .child-table th, .child-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 20px; }
+  .child-table th { text-align: left; color: var(--muted); font-size: 14px; font-weight: 600; }
+  .child-cell-inf { font-weight: 700; }
 
   /* Learn mode */
   .flash-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
@@ -141,6 +144,8 @@
     padding: 12px 14px;
     border-bottom: 1px solid var(--border);
   }
+  .modal-filters .btn { background: #fff; color: #111; border-color: var(--border); }
+  .modal-filters .btn.active { background: #16a34a; color: #fff; border-color: #16a34a; }
   .modal-content {
     overflow: auto;
     padding: 12px 14px;
@@ -156,6 +161,13 @@
     gap: 6px;
     background: #f9fafb;
   }
+  .verbs-row-clickable { cursor: pointer; }
+  .modal-child-wrap { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #d1d5db; }
+  .modal-child-table { width: 100%; border-collapse: collapse; }
+  .modal-child-row td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; }
+  .modal-child-inf { font-weight: 700; font-size: 18px; }
+  .modal-child-tr { text-align: right; font-size: 18px; }
+  .modal-child-empty { margin: 0; color: var(--muted); }
   .verbs-row-head {
     display: flex;
     align-items: baseline;
@@ -196,12 +208,14 @@
           <button type="button" data-lang="UA">UA</button>
           <button type="button" data-lang="RU" class="active">RU</button>
         </div>
-        <button type="button" id="parentOnlyBtn" class="btn icon-btn" aria-label="Toggle Parent-Children mode" title="Toggle Parent-Children mode">🌱</button>
         <button type="button" id="ttsToggleBtn" class="btn icon-btn" aria-label="Toggle speech" title="Toggle speech">🔇</button>
         <button type="button" id="openVerbsBtn" class="btn icon-btn" aria-label="Open verbs list" title="Open verbs list">📚</button>
       </div>
     </div>
-    <div id="levelFilters" class="level-filters" role="group" aria-label="Level filters"></div>
+    <div class="level-row">
+      <div id="levelFilters" class="level-filters" role="group" aria-label="Level filters"></div>
+      <button type="button" id="parentOnlyBtn" class="btn icon-btn" aria-label="Toggle Parent-Children mode" title="Toggle Parent-Children mode">🌱</button>
+    </div>
     <div id="modeGroup" class="segmented segmented-wide" role="group" aria-label="Mode">
       <button type="button" id="modeLearn" class="active">Learn</button>
       <button type="button" id="modeQuiz">Quiz</button>

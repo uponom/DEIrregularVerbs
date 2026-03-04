@@ -12,6 +12,8 @@ const STRINGS = {
       ttsOffAria: 'Включить автоозвучку',
       parentOnlyOnAria: 'Выключить режим Parent-Children',
       parentOnlyOffAria: 'Включить режим Parent-Children',
+      modalParentOnlyOnAria: 'Выключить Parent-Children фильтр в списке',
+      modalParentOnlyOffAria: 'Включить Parent-Children фильтр в списке',
       cardSpeakAria: 'Озвучить карточку',
       sortInfAria: 'Сортировка: инфинитив',
       sortTrAria: 'Сортировка: перевод',
@@ -31,6 +33,9 @@ const STRINGS = {
     parentChildren: {
       title: 'Производные глаголы',
       empty: 'Для этого глагола нет child-форм.',
+      infinitive: 'Инфинитив',
+      translation: 'Перевод',
+      modalExpandAria: 'Показать child-глаголы',
     },
     quiz: {
       inf: 'Infinitiv',
@@ -70,6 +75,8 @@ const STRINGS = {
       ttsOffAria: 'Увімкнути автоозвучення',
       parentOnlyOnAria: 'Вимкнути режим Parent-Children',
       parentOnlyOffAria: 'Увімкнути режим Parent-Children',
+      modalParentOnlyOnAria: 'Вимкнути Parent-Children фільтр у списку',
+      modalParentOnlyOffAria: 'Увімкнути Parent-Children фільтр у списку',
       cardSpeakAria: 'Озвучити картку',
       sortInfAria: 'Сортування: інфінітив',
       sortTrAria: 'Сортування: переклад',
@@ -89,6 +96,9 @@ const STRINGS = {
     parentChildren: {
       title: 'Похідні дієслова',
       empty: 'Для цього дієслова немає child-форм.',
+      infinitive: 'Інфінітив',
+      translation: 'Переклад',
+      modalExpandAria: 'Показати child-дієслова',
     },
     quiz: {
       inf: 'Infinitiv',
@@ -128,6 +138,8 @@ const STRINGS = {
       ttsOffAria: 'Enable auto speech',
       parentOnlyOnAria: 'Disable Parent-Children mode',
       parentOnlyOffAria: 'Enable Parent-Children mode',
+      modalParentOnlyOnAria: 'Disable Parent-Children filter in list',
+      modalParentOnlyOffAria: 'Enable Parent-Children filter in list',
       cardSpeakAria: 'Speak card',
       sortInfAria: 'Sort: infinitive',
       sortTrAria: 'Sort: translation',
@@ -147,6 +159,9 @@ const STRINGS = {
     parentChildren: {
       title: 'Child verbs',
       empty: 'No child verbs for this parent.',
+      infinitive: 'Infinitive',
+      translation: 'Translation',
+      modalExpandAria: 'Show child verbs',
     },
     quiz: {
       inf: 'Infinitive',

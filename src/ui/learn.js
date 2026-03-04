@@ -66,21 +66,32 @@ export function renderLearn(main, params) {
   card.appendChild(actions);
 
   if (showParentChildren) {
+    const rows = Array.isArray(childRows) ? childRows : [];
+    if (!rows.length) {
+      main.replaceChildren(card);
+      return;
+    }
+
     const wrap = createElement('section', 'child-list-wrap');
     wrap.appendChild(createElement('h3', 'child-list-title', labels.parentChildren.title));
 
-    const rows = Array.isArray(childRows) ? childRows : [];
-    if (!rows.length) {
-      wrap.appendChild(createElement('p', 'child-list-empty', labels.parentChildren.empty));
-    } else {
-      const list = createElement('ul', 'child-list');
-      rows.forEach((row) => {
-        const line = createElement('li', 'child-list-item');
-        line.textContent = `${row.de || fallback} - ${row.translation || fallback}`;
-        list.appendChild(line);
-      });
-      wrap.appendChild(list);
-    }
+    const table = createElement('table', 'child-table');
+    const head = createElement('thead', 'child-table-head');
+    const headRow = createElement('tr', '');
+    headRow.appendChild(createElement('th', 'child-col-inf', labels.parentChildren.infinitive));
+    headRow.appendChild(createElement('th', 'child-col-tr', labels.parentChildren.translation));
+    head.appendChild(headRow);
+    table.appendChild(head);
+
+    const body = createElement('tbody', '');
+    rows.forEach((row) => {
+      const tr = createElement('tr', 'child-table-row');
+      tr.appendChild(createElement('td', 'child-cell-inf', row.de || fallback));
+      tr.appendChild(createElement('td', 'child-cell-tr', row.translation || fallback));
+      body.appendChild(tr);
+    });
+    table.appendChild(body);
+    wrap.appendChild(table);
 
     card.appendChild(wrap);
   }

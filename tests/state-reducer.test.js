@@ -64,6 +64,35 @@ test('parent-only mode toggles in reducer', () => {
   assert.equal(state.parentOnly, false);
 });
 
+test('modal parent-only mode toggles and resets expanded row', () => {
+  let state = createInitialState();
+  assert.equal(state.modalParentOnly, false);
+  assert.equal(state.expandedModalParentId, null);
+
+  state = reduceState(state, { type: ACTIONS.TOGGLE_MODAL_PARENT_ONLY }, CONTEXT);
+  assert.equal(state.modalParentOnly, true);
+
+  state = reduceState(state, { type: ACTIONS.TOGGLE_MODAL_PARENT_EXPANDED, value: 'p1' }, CONTEXT);
+  assert.equal(state.expandedModalParentId, 'p1');
+
+  state = reduceState(state, { type: ACTIONS.TOGGLE_MODAL_PARENT_ONLY }, CONTEXT);
+  assert.equal(state.modalParentOnly, false);
+  assert.equal(state.expandedModalParentId, null);
+});
+
+test('modal expanded parent toggles and closes on modal close', () => {
+  let state = createInitialState();
+  state = reduceState(state, { type: ACTIONS.TOGGLE_MODAL_PARENT_EXPANDED, value: 'p1' }, CONTEXT);
+  assert.equal(state.expandedModalParentId, 'p1');
+
+  state = reduceState(state, { type: ACTIONS.TOGGLE_MODAL_PARENT_EXPANDED, value: 'p1' }, CONTEXT);
+  assert.equal(state.expandedModalParentId, null);
+
+  state = reduceState(state, { type: ACTIONS.TOGGLE_MODAL_PARENT_EXPANDED, value: 'p2' }, CONTEXT);
+  state = reduceState(state, { type: ACTIONS.CLOSE_VERBS_MODAL }, CONTEXT);
+  assert.equal(state.expandedModalParentId, null);
+});
+
 test('createItems keeps parent link from normalized records', () => {
   const raw = [
     { id: 'root', Parent: '', Infinitiv: 'kommen', RU: 'приходить' },

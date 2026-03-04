@@ -139,3 +139,15 @@
 - [x] 14.7 Add/update automated tests for schema/state/ui shell hooks.
 - [x] 14.8 Run data validation, full test suite, and manual UI smoke via Chrome DevTools MCP.
 - [x] 14.9 Update README with user-facing feature description and implementation notes.
+
+## 15) Parent-Children UI Follow-up
+- [x] 15.1 Hide child block in Learn mode when current parent has no child verbs.
+- [x] 15.2 Replace Learn child bullet list with a larger-font table and bold infinitive column.
+- [x] 15.3 Move Parent-Children toggle to the level-filter row and right-align it.
+- [x] 15.4 Update top control/button color scheme: inactive black, active gray.
+- [x] 15.5 Update modal filter button colors: active green, inactive white.
+- [x] 15.6 Add Parent-Children filter button to modal list.
+- [x] 15.7 Add modal row expansion for child verbs when modal Parent-Children filter is enabled.
+- [x] 15.8 Add/update tests for state transitions and shell hooks.
+- [x] 15.9 Run full tests, data validation, and UI smoke via Chrome DevTools MCP.
+- [x] 15.10 Update README to reflect final behavior.

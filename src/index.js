@@ -57,7 +57,8 @@ function getMainFilteredItems(state) {
 }
 
 function getModalFilteredItems(state) {
-  return VERBS_LIST.filterByLevels(ITEMS, state.selectedModalLevels, AVAILABLE_LEVELS);
+  const byLevel = VERBS_LIST.filterByLevels(ITEMS, state.selectedModalLevels, AVAILABLE_LEVELS);
+  return filterByParentOnly(byLevel, state.modalParentOnly);
 }
 
 store = createStore(createInitialState(), () => ({ itemsLength: getMainFilteredItems(store.getState()).length, levels: AVAILABLE_LEVELS }));
@@ -164,11 +165,16 @@ function renderModal(modalFilteredItems) {
     labels,
     levels: AVAILABLE_LEVELS,
     selectedLevels: getSelectedModalLevels(state),
+    modalParentOnly: state.modalParentOnly,
+    expandedModalParentId: state.expandedModalParentId,
     sortMode: state.verbsSortMode,
     verbs,
     onClose: () => dispatch({ type: ACTIONS.CLOSE_VERBS_MODAL }),
     onSortToggle: () => dispatch({ type: ACTIONS.TOGGLE_VERBS_SORT }),
     onLevelToggle: (level) => dispatch({ type: ACTIONS.TOGGLE_MODAL_LEVEL_FILTER, value: level }),
+    onModalParentOnlyToggle: () => dispatch({ type: ACTIONS.TOGGLE_MODAL_PARENT_ONLY }),
+    getChildRows: (parentId) => createChildRows(CHILDREN_MAP, parentId, state.uiLang),
+    onVerbToggle: (parentId) => dispatch({ type: ACTIONS.TOGGLE_MODAL_PARENT_EXPANDED, value: parentId }),
   });
 }
 

@@ -11,6 +11,7 @@ A single-page Progressive Web App (PWA) for learning German irregular verbs.
 - Full verbs list in a modal window with sorting and level-based filtering.
 - Level-based filtering is available both in training and in quiz modes.
 - Parent-Children mode helps focus on base verbs (parents) and review derived child verbs.
+- In Learn mode, child verbs are shown as a compact table only when they exist for the current parent verb.
 - Text-to-speech pronunciation for verb forms and translation.
 - Manual card speech playback and optional automatic speech in Learn mode.
 - Installable PWA with offline support.
@@ -20,8 +21,10 @@ A single-page Progressive Web App (PWA) for learning German irregular verbs.
 - Top controls use icon-only buttons.
 - Verbs list and card-level filters are maintained as separate filter states.
 - Parent-Children mode is implemented as an additional cards-flow filter toggle.
+- Parent-Children toggle is placed in the level-filter row; modal has its own Parent-Children filter toggle.
 - Level filter logic prevents an empty selection (at least one level always active).
 - Child verbs are linked through `Parent` (`child.Parent = parent.id`) and shown in Learn mode under the current parent card.
+- In modal Parent-Children mode, parent rows can be expanded to show child verbs inline.
 - Auto-TTS in Learn mode runs only when a new card is shown.
 - TTS is implemented through Web Speech API (`de-DE` + active UI language for translation).
 - State transitions are centralized via `dispatch(action)`.

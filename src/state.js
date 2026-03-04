@@ -11,6 +11,8 @@ export const ACTIONS = {
   TOGGLE_MAIN_LEVEL_FILTER: 'TOGGLE_MAIN_LEVEL_FILTER',
   TOGGLE_MODAL_LEVEL_FILTER: 'TOGGLE_MODAL_LEVEL_FILTER',
   TOGGLE_PARENT_ONLY: 'TOGGLE_PARENT_ONLY',
+  TOGGLE_MODAL_PARENT_ONLY: 'TOGGLE_MODAL_PARENT_ONLY',
+  TOGGLE_MODAL_PARENT_EXPANDED: 'TOGGLE_MODAL_PARENT_EXPANDED',
   RESET_LEVEL_FILTERS: 'RESET_LEVEL_FILTERS',
   QUIZ_RESET: 'QUIZ_RESET',
   QUIZ_SET_DE: 'QUIZ_SET_DE',
@@ -34,6 +36,8 @@ export function createInitialState() {
     selectedMainLevels: null,
     selectedModalLevels: null,
     parentOnly: false,
+    modalParentOnly: false,
+    expandedModalParentId: null,
   };
 }
 
@@ -155,6 +159,7 @@ export function reduceState(state, action, context) {
       return {
         ...currentState,
         verbsModalOpen: false,
+        expandedModalParentId: null,
       };
     case ACTIONS.TOGGLE_VERBS_SORT:
       return {
@@ -165,6 +170,18 @@ export function reduceState(state, action, context) {
       return {
         ...currentState,
         parentOnly: !currentState.parentOnly,
+      };
+    case ACTIONS.TOGGLE_MODAL_PARENT_ONLY:
+      return {
+        ...currentState,
+        modalParentOnly: !currentState.modalParentOnly,
+        expandedModalParentId: null,
+      };
+    case ACTIONS.TOGGLE_MODAL_PARENT_EXPANDED:
+      return {
+        ...currentState,
+        expandedModalParentId:
+          currentState.expandedModalParentId === action.value ? null : (action.value || null),
       };
     case ACTIONS.TOGGLE_MAIN_LEVEL_FILTER:
     case ACTIONS.TOGGLE_MODAL_LEVEL_FILTER: {
@@ -188,6 +205,7 @@ export function reduceState(state, action, context) {
         ...currentState,
         selectedMainLevels: null,
         selectedModalLevels: null,
+        expandedModalParentId: null,
       };
     case ACTIONS.QUIZ_RESET:
       return {
