@@ -7,7 +7,7 @@ const vm = require('node:vm');
 function loadStateModule() {
   const sourcePath = path.join(__dirname, '..', 'src', 'state.js');
   const source = fs.readFileSync(sourcePath, 'utf8');
-  const transformed = `${source.replace(/^export\s+/gm, '')}\nmodule.exports = { ACTIONS, createInitialState, reduceState };\n`;
+  const transformed = `${source.replace(/^export\s+/gm, '')}\nmodule.exports = {\n  ACTIONS,\n  createInitialState,\n  reduceState,\n  createItems,\n  filterByParentOnly,\n  createChildrenMap,\n  createChildRows,\n};\n`;
 
   const context = {
     module: { exports: {} },
@@ -18,7 +18,15 @@ function loadStateModule() {
   return context.module.exports;
 }
 
-const { ACTIONS, createInitialState, reduceState } = loadStateModule();
+const {
+  ACTIONS,
+  createInitialState,
+  reduceState,
+  createItems,
+  filterByParentOnly,
+  createChildrenMap,
+  createChildRows,
+} = loadStateModule();
 
 const CONTEXT = { levels: ['A1', 'A2'] };
 
@@ -45,4 +53,61 @@ test('cannot disable the last selected level in modal filters', () => {
   state = reduceState(state, { type: ACTIONS.TOGGLE_MODAL_LEVEL_FILTER, value: 'A2' }, CONTEXT);
 
   assert.deepEqual(state.selectedModalLevels, ['A2']);
+});
+
+test('parent-only mode toggles in reducer', () => {
+  let state = createInitialState();
+  assert.equal(state.parentOnly, false);
+  state = reduceState(state, { type: ACTIONS.TOGGLE_PARENT_ONLY }, CONTEXT);
+  assert.equal(state.parentOnly, true);
+  state = reduceState(state, { type: ACTIONS.TOGGLE_PARENT_ONLY }, CONTEXT);
+  assert.equal(state.parentOnly, false);
+});
+
+test('createItems keeps parent link from normalized records', () => {
+  const raw = [
+    { id: 'root', Parent: '', Infinitiv: 'kommen', RU: 'приходить' },
+    { id: 'child', Parent: 'root', Infinitiv: 'ankommen', RU: 'прибывать' },
+  ];
+  const normalizer = (records) => records.map((record) => ({
+    id: record.id,
+    parent: record.Parent,
+    level: 'A1',
+    infinitive: record.Infinitiv,
+    present3: '',
+    preterite: 'x',
+    participle2: 'y',
+    auxiliary: 'haben',
+    classes: { infinitive: '', present3: '', preterite: '', participle2: '' },
+    variant: '',
+    note: '',
+    translations: { ru: record.RU, ua: '', en: '' },
+  }));
+
+  const items = createItems(raw, normalizer);
+  const child = items.find((item) => item.id === 'child');
+  assert.ok(child);
+  assert.equal(child.parent, 'root');
+});
+
+test('filterByParentOnly returns only base verbs when enabled', () => {
+  const sample = [
+    { id: 'a', parent: '' },
+    { id: 'b', parent: 'a' },
+  ];
+  assert.deepEqual(filterByParentOnly(sample, false).map((x) => x.id), ['a', 'b']);
+  assert.deepEqual(filterByParentOnly(sample, true).map((x) => x.id), ['a']);
+});
+
+test('children map groups by parent and child rows are sorted by infinitive', () => {
+  const sample = [
+    { id: 'p', parent: '', de: 'kommen', ru: 'приходить', ua: '', en: '' },
+    { id: 'c2', parent: 'p', de: 'zurueckkommen', ru: 'возвращаться', ua: '', en: '' },
+    { id: 'c1', parent: 'p', de: 'ankommen', ru: 'прибывать', ua: '', en: '' },
+  ];
+
+  const map = createChildrenMap(sample);
+  const rows = createChildRows(map, 'p', 'RU');
+  assert.deepEqual(Array.from(rows, (row) => row.de), ['ankommen', 'zurueckkommen']);
+  assert.deepEqual(Array.from(rows, (row) => row.translation), ['прибывать', 'возвращаться']);
 });

@@ -58,6 +58,11 @@
   .actions { display: flex; margin-top: 12px; }
   .actions-right { justify-content: flex-end; }
   .actions-between { justify-content: space-between; }
+  .child-list-wrap { margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 12px; }
+  .child-list-title { margin: 0 0 8px; font-size: 16px; }
+  .child-list-empty { margin: 0; color: var(--muted); font-size: 14px; }
+  .child-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+  .child-list-item { font-size: 16px; }
 
   /* Learn mode */
   .flash-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
@@ -191,6 +196,7 @@
           <button type="button" data-lang="UA">UA</button>
           <button type="button" data-lang="RU" class="active">RU</button>
         </div>
+        <button type="button" id="parentOnlyBtn" class="btn icon-btn" aria-label="Toggle Parent-Children mode" title="Toggle Parent-Children mode">🌱</button>
         <button type="button" id="ttsToggleBtn" class="btn icon-btn" aria-label="Toggle speech" title="Toggle speech">🔇</button>
         <button type="button" id="openVerbsBtn" class="btn icon-btn" aria-label="Open verbs list" title="Open verbs list">📚</button>
       </div>

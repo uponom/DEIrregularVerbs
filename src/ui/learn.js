@@ -6,7 +6,7 @@ function createElement(tag, className, text) {
 }
 
 export function renderLearn(main, params) {
-  const { item, translation, labels, fallback, onNext, onSpeakCard } = params;
+  const { item, translation, labels, fallback, onNext, onSpeakCard, childRows, showParentChildren } = params;
 
   const card = createElement('section', 'card');
   const flash = createElement('div', 'flash-grid');
@@ -64,6 +64,26 @@ export function renderLearn(main, params) {
   nextButton.onclick = onNext;
   actions.appendChild(nextButton);
   card.appendChild(actions);
+
+  if (showParentChildren) {
+    const wrap = createElement('section', 'child-list-wrap');
+    wrap.appendChild(createElement('h3', 'child-list-title', labels.parentChildren.title));
+
+    const rows = Array.isArray(childRows) ? childRows : [];
+    if (!rows.length) {
+      wrap.appendChild(createElement('p', 'child-list-empty', labels.parentChildren.empty));
+    } else {
+      const list = createElement('ul', 'child-list');
+      rows.forEach((row) => {
+        const line = createElement('li', 'child-list-item');
+        line.textContent = `${row.de || fallback} - ${row.translation || fallback}`;
+        list.appendChild(line);
+      });
+      wrap.appendChild(list);
+    }
+
+    card.appendChild(wrap);
+  }
 
   main.replaceChildren(card);
 }

@@ -30,6 +30,7 @@
 
     return {
       id: normalizeScalar(pickFirst(safeRecord, ['id', 'ID'])),
+      parent: normalizeScalar(pickFirst(safeRecord, ['parent', 'Parent'])),
       level: normalizeScalar(pickFirst(safeRecord, ['level', 'Level'])).toUpperCase(),
       infinitive: normalizeScalar(pickFirst(safeRecord, ['infinitive', 'Infinitiv'])),
       present3: normalizeScalar(pickFirst(safeRecord, ['present3', 'Praesens3'])),

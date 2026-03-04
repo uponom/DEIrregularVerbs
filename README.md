@@ -10,6 +10,7 @@ A single-page Progressive Web App (PWA) for learning German irregular verbs.
 - Interface and translations are available in `RU`, `UA`, and `EN`.
 - Full verbs list in a modal window with sorting and level-based filtering.
 - Level-based filtering is available both in training and in quiz modes.
+- Parent-Children mode helps focus on base verbs (parents) and review derived child verbs.
 - Text-to-speech pronunciation for verb forms and translation.
 - Manual card speech playback and optional automatic speech in Learn mode.
 - Installable PWA with offline support.
@@ -18,7 +19,9 @@ A single-page Progressive Web App (PWA) for learning German irregular verbs.
 
 - Top controls use icon-only buttons.
 - Verbs list and card-level filters are maintained as separate filter states.
+- Parent-Children mode is implemented as an additional cards-flow filter toggle.
 - Level filter logic prevents an empty selection (at least one level always active).
+- Child verbs are linked through `Parent` (`child.Parent = parent.id`) and shown in Learn mode under the current parent card.
 - Auto-TTS in Learn mode runs only when a new card is shown.
 - TTS is implemented through Web Speech API (`de-DE` + active UI language for translation).
 - State transitions are centralized via `dispatch(action)`.
@@ -176,7 +179,8 @@ Current file format (raw source shape):
 - top-level: JavaScript array assigned to `window.VERBS`;
 - one object per verb record;
 - legacy field names are preserved in the dataset:
-  - identity and level: `id`, `Level`;
+  - identity and hierarchy: `id`, `Parent`;
+  - level: `Level`;
   - verb forms: `Infinitiv`, `Praesens3`, `Praeteritum`, `Partizip2`, `AuxVerb`;
   - vowel-change markers: `InfChar`, `P3Char`, `PraetChar`, `P2Char`;
   - translations: `RU`, `UA`, `EN`;
@@ -187,6 +191,7 @@ Example record:
 ```js
 {
   id: "sehen-sah-gesehen",
+  Parent: "",
   Level: "A1",
   Infinitiv: "sehen",
   Praesens3: "sieht",
@@ -208,6 +213,7 @@ This allows the source file to stay backward-compatible while the app logic uses
 The validator `scripts/validate-verbs.js` checks:
 
 - required and unique `id` per record;
+- valid `Parent` references (`Parent` points to an existing `id`, not to itself);
 - duplicate keys;
 - required fields (`Infinitiv`, `Praeteritum`, `Partizip2`);
 - presence of at least one translation (`RU`/`UA`/`EN`);
@@ -221,6 +227,7 @@ The validator `scripts/validate-verbs.js` checks:
 Canonical normalized shape:
 
 - `id`: required unique string;
+- `parent`: parent verb id for child records (empty for base parent verbs);
 - `level`: CEFR level (`A1`, `A2`, `B1`, ...);
 - `infinitive`, `present3`, `preterite`, `participle2`, `auxiliary`: normalized verb forms;
 - `classes`: grouped vowel-change markers (`infinitive`, `present3`, `preterite`, `participle2`);

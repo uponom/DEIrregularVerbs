@@ -16,6 +16,7 @@ test('normalizeScalar trims scalar values and handles nullish values', () => {
 
 test('normalizeVerbRecord converts legacy record fields to canonical schema', () => {
   const normalized = normalizeVerbRecord({
+    Parent: 'gehen-ging-gegangen',
     Level: 'a2',
     Infinitiv: ' gehen ',
     Praesens3: 'geht',
@@ -32,6 +33,7 @@ test('normalizeVerbRecord converts legacy record fields to canonical schema', ()
     Notes: 'common',
   });
 
+  assert.equal(normalized.parent, 'gehen-ging-gegangen');
   assert.equal(normalized.level, 'A2');
   assert.equal(normalized.infinitive, 'gehen');
   assert.equal(normalized.present3, 'geht');
@@ -51,6 +53,7 @@ test('normalizeVerbRecord converts legacy record fields to canonical schema', ()
 test('normalizeVerbRecord keeps already canonical records stable', () => {
   const normalized = normalizeVerbRecord({
     id: 'gehen-1',
+    parent: 'root-1',
     level: 'B1',
     infinitive: 'gehen',
     present3: 'geht',
@@ -71,6 +74,7 @@ test('normalizeVerbRecord keeps already canonical records stable', () => {
   });
 
   assert.equal(normalized.id, 'gehen-1');
+  assert.equal(normalized.parent, 'root-1');
   assert.equal(normalized.level, 'B1');
   assert.equal(normalized.infinitive, 'gehen');
   assert.equal(normalized.preterite, 'ging');

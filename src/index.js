@@ -1,9 +1,12 @@
 import { getStrings } from './i18n.js';
 import {
   ACTIONS,
+  createChildRows,
+  createChildrenMap,
   createInitialState,
   createItems,
   createStore,
+  filterByParentOnly,
   shuffle,
   translate,
 } from './state.js';
@@ -27,11 +30,13 @@ const langGroup = document.getElementById('langGroup');
 const levelFilters = document.getElementById('levelFilters');
 const modeLearnButton = document.getElementById('modeLearn');
 const modeQuizButton = document.getElementById('modeQuiz');
+const parentOnlyButton = document.getElementById('parentOnlyBtn');
 const ttsToggleButton = document.getElementById('ttsToggleBtn');
 const openVerbsButton = document.getElementById('openVerbsBtn');
 const verbsModalRoot = document.getElementById('verbsModalRoot');
 const ttsService = createTtsService();
 const AVAILABLE_LEVELS = VERBS_LIST.getAvailableLevels(ITEMS);
+const CHILDREN_MAP = createChildrenMap(ITEMS);
 
 let store;
 let lastAutoSpokenCardId = null;
@@ -47,7 +52,8 @@ function getSelectedModalLevels(state) {
 }
 
 function getMainFilteredItems(state) {
-  return VERBS_LIST.filterByLevels(ITEMS, state.selectedMainLevels, AVAILABLE_LEVELS);
+  const byLevel = VERBS_LIST.filterByLevels(ITEMS, state.selectedMainLevels, AVAILABLE_LEVELS);
+  return filterByParentOnly(byLevel, state.parentOnly);
 }
 
 function getModalFilteredItems(state) {
@@ -104,6 +110,11 @@ function renderControls() {
   ttsToggleButton.title = state.tts ? labels.controls.ttsOnAria : labels.controls.ttsOffAria;
   ttsToggleButton.setAttribute('aria-label', ttsToggleButton.title);
   setPressed(ttsToggleButton, state.tts);
+
+  parentOnlyButton.textContent = '🌱';
+  parentOnlyButton.title = state.parentOnly ? labels.controls.parentOnlyOnAria : labels.controls.parentOnlyOffAria;
+  parentOnlyButton.setAttribute('aria-label', parentOnlyButton.title);
+  setPressed(parentOnlyButton, state.parentOnly);
 
   openVerbsButton.title = labels.controls.openListAria;
   openVerbsButton.setAttribute('aria-label', labels.controls.openListAria);
@@ -189,11 +200,14 @@ function renderApp() {
   }
 
   if (state.mode === 'learn') {
+    const childRows = state.parentOnly ? createChildRows(CHILDREN_MAP, item.id, state.uiLang) : [];
     renderLearn(main, {
       item,
       translation: translate(item, state.uiLang),
       labels,
       fallback: labels.fallback,
+      childRows,
+      showParentChildren: state.parentOnly,
       onNext: () => dispatch({ type: ACTIONS.NEXT_ITEM }),
       onSpeakCard: () => {
         ttsService.speakSegments(getSpeakSegments(item, state.uiLang), state.tts, { force: true });
@@ -255,6 +269,7 @@ modeLearnButton.onclick = () => dispatch({ type: ACTIONS.SET_MODE, value: 'learn
 modeQuizButton.onclick = () => {
   dispatch({ type: ACTIONS.SET_MODE, value: 'quiz' });
 };
+parentOnlyButton.onclick = () => dispatch({ type: ACTIONS.TOGGLE_PARENT_ONLY });
 ttsToggleButton.onclick = () => dispatch({ type: ACTIONS.TOGGLE_TTS });
 openVerbsButton.onclick = () => dispatch({ type: ACTIONS.OPEN_VERBS_MODAL });
 

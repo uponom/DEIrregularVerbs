@@ -163,6 +163,16 @@ function validateRecords(verbs) {
 
   // Optional sanity checks for required fields
   normalizedRecords.forEach((v, idx) => {
+    const id = normalizeString(v.id);
+    const parentId = normalizeString(v.parent);
+    if (parentId) {
+      if (parentId === id) {
+        errors.push(`[INVALID_PARENT_SELF] row=${idx + 1} id=${id}`);
+      } else if (!idRows.has(parentId)) {
+        errors.push(`[MISSING_PARENT_ID] row=${idx + 1} parent=${parentId}`);
+      }
+    }
+
     const inf = normalizeString(v.infinitive);
     const pret = normalizeString(v.preterite);
     const part2 = normalizeString(v.participle2);

@@ -128,3 +128,14 @@
 - [x] 13.3 Ensure modal filter interactions do not trigger auto-TTS card playback.
 - [x] 13.4 Add/update tests for reducer/filter behavior.
 - [x] 13.5 Run manual UI smoke regression via Chrome DevTools MCP.
+
+## 14) Parent-Children Learning Mode
+- [x] 14.1 Extend dataset records with `Parent` field (default empty string for all entries).
+- [x] 14.2 Populate `Parent` links for child verbs (`Parent` = parent verb `id`).
+- [x] 14.3 Extend normalization/schema to expose parent relation in runtime model.
+- [x] 14.4 Add a top control toggle for Parent-Children mode (emoji button with a11y labels).
+- [x] 14.5 Add Parent-Children filtering in Learn/Quiz flow (show only parent verbs when enabled).
+- [x] 14.6 In Learn mode + Parent-Children enabled, show sorted child list (`Infinitiv - translation`) under card.
+- [x] 14.7 Add/update automated tests for schema/state/ui shell hooks.
+- [x] 14.8 Run data validation, full test suite, and manual UI smoke via Chrome DevTools MCP.
+- [x] 14.9 Update README with user-facing feature description and implementation notes.

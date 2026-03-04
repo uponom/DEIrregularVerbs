@@ -87,3 +87,14 @@ test('validateRecords flags missing and duplicate ids', () => {
   assert.equal(result.errors.some((x) => x.includes('[MISSING_ID]')), true);
   assert.equal(result.errors.some((x) => x.includes('[DUPLICATE_ID]')), true);
 });
+
+test('validateRecords flags invalid Parent references', () => {
+  const records = [
+    { id: 'gehen-ging-gegangen', Level: 'A1', Infinitiv: 'gehen', Praeteritum: 'ging', Partizip2: 'gegangen', RU: 'идти', Parent: 'missing-id' },
+    { id: 'kommen-kam-gekommen', Level: 'A1', Infinitiv: 'kommen', Praeteritum: 'kam', Partizip2: 'gekommen', RU: 'приходить', Parent: 'kommen-kam-gekommen' },
+  ];
+
+  const result = validateRecords(records);
+  assert.equal(result.errors.some((x) => x.includes('[MISSING_PARENT_ID]')), true);
+  assert.equal(result.errors.some((x) => x.includes('[INVALID_PARENT_SELF]')), true);
+});

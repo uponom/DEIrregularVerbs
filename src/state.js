@@ -10,6 +10,7 @@ export const ACTIONS = {
   TOGGLE_VERBS_SORT: 'TOGGLE_VERBS_SORT',
   TOGGLE_MAIN_LEVEL_FILTER: 'TOGGLE_MAIN_LEVEL_FILTER',
   TOGGLE_MODAL_LEVEL_FILTER: 'TOGGLE_MODAL_LEVEL_FILTER',
+  TOGGLE_PARENT_ONLY: 'TOGGLE_PARENT_ONLY',
   RESET_LEVEL_FILTERS: 'RESET_LEVEL_FILTERS',
   QUIZ_RESET: 'QUIZ_RESET',
   QUIZ_SET_DE: 'QUIZ_SET_DE',
@@ -32,6 +33,7 @@ export function createInitialState() {
     verbsSortMode: 'infinitive',
     selectedMainLevels: null,
     selectedModalLevels: null,
+    parentOnly: false,
   };
 }
 
@@ -48,6 +50,7 @@ export function createItems(rawVerbs, normalizer) {
   const normalized = normalizer ? normalizer(rawVerbs) : [];
   const mapped = normalized.map((v) => ({
     id: v.id,
+    parent: v.parent || '',
     level: v.level,
     ru: v.translations.ru,
     ua: v.translations.ua,
@@ -59,6 +62,39 @@ export function createItems(rawVerbs, normalizer) {
     aux: v.auxiliary,
   }));
   return shuffle(mapped).filter((x) => x.de && (x.ru || x.ua || x.en));
+}
+
+export function filterByParentOnly(items, parentOnly) {
+  const safeItems = Array.isArray(items) ? items : [];
+  if (!parentOnly) return safeItems;
+  return safeItems.filter((item) => !item.parent);
+}
+
+export function createChildrenMap(items) {
+  const map = new Map();
+  const safeItems = Array.isArray(items) ? items : [];
+
+  safeItems.forEach((item) => {
+    if (!item.parent) return;
+    if (!map.has(item.parent)) map.set(item.parent, []);
+    map.get(item.parent).push(item);
+  });
+
+  for (const list of map.values()) {
+    list.sort((a, b) => (a.de || '').localeCompare(b.de || '', 'de'));
+  }
+
+  return map;
+}
+
+export function createChildRows(childrenMap, parentId, uiLang) {
+  if (!childrenMap || !parentId) return [];
+  const children = childrenMap.get(parentId) || [];
+  return children.map((item) => ({
+    id: item.id,
+    de: item.de,
+    translation: translate(item, uiLang),
+  }));
 }
 
 export function translate(item, uiLang) {
@@ -124,6 +160,11 @@ export function reduceState(state, action, context) {
       return {
         ...currentState,
         verbsSortMode: currentState.verbsSortMode === 'infinitive' ? 'translation' : 'infinitive',
+      };
+    case ACTIONS.TOGGLE_PARENT_ONLY:
+      return {
+        ...currentState,
+        parentOnly: !currentState.parentOnly,
       };
     case ACTIONS.TOGGLE_MAIN_LEVEL_FILTER:
     case ACTIONS.TOGGLE_MODAL_LEVEL_FILTER: {

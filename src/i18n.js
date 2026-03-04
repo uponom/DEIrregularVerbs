@@ -10,6 +10,8 @@ const STRINGS = {
       closeListAria: 'Закрыть список глаголов',
       ttsOnAria: 'Выключить автоозвучку',
       ttsOffAria: 'Включить автоозвучку',
+      parentOnlyOnAria: 'Выключить режим Parent-Children',
+      parentOnlyOffAria: 'Включить режим Parent-Children',
       cardSpeakAria: 'Озвучить карточку',
       sortInfAria: 'Сортировка: инфинитив',
       sortTrAria: 'Сортировка: перевод',
@@ -25,6 +27,10 @@ const STRINGS = {
       infPras: 'Infinitiv/Präsens',
       pret: 'Präteritum',
       part2: 'Partizip II',
+    },
+    parentChildren: {
+      title: 'Производные глаголы',
+      empty: 'Для этого глагола нет child-форм.',
     },
     quiz: {
       inf: 'Infinitiv',
@@ -62,6 +68,8 @@ const STRINGS = {
       closeListAria: 'Закрити список дієслів',
       ttsOnAria: 'Вимкнути автоозвучення',
       ttsOffAria: 'Увімкнути автоозвучення',
+      parentOnlyOnAria: 'Вимкнути режим Parent-Children',
+      parentOnlyOffAria: 'Увімкнути режим Parent-Children',
       cardSpeakAria: 'Озвучити картку',
       sortInfAria: 'Сортування: інфінітив',
       sortTrAria: 'Сортування: переклад',
@@ -77,6 +85,10 @@ const STRINGS = {
       infPras: 'Infinitiv/Präsens',
       pret: 'Präteritum',
       part2: 'Partizip II',
+    },
+    parentChildren: {
+      title: 'Похідні дієслова',
+      empty: 'Для цього дієслова немає child-форм.',
     },
     quiz: {
       inf: 'Infinitiv',
@@ -114,6 +126,8 @@ const STRINGS = {
       closeListAria: 'Close verbs list',
       ttsOnAria: 'Disable auto speech',
       ttsOffAria: 'Enable auto speech',
+      parentOnlyOnAria: 'Disable Parent-Children mode',
+      parentOnlyOffAria: 'Enable Parent-Children mode',
       cardSpeakAria: 'Speak card',
       sortInfAria: 'Sort: infinitive',
       sortTrAria: 'Sort: translation',
@@ -129,6 +143,10 @@ const STRINGS = {
       infPras: 'Infinitive/Present',
       pret: 'Preterite',
       part2: 'Participle II',
+    },
+    parentChildren: {
+      title: 'Child verbs',
+      empty: 'No child verbs for this parent.',
     },
     quiz: {
       inf: 'Infinitive',
