@@ -6,24 +6,26 @@ A single-page Progressive Web App (PWA) for learning German irregular verbs.
 
 - `Learn` mode: shows `Infinitiv`, `Präteritum`, `Partizip II`, and translation.
 - `Quiz` mode: step-by-step form selection from multiple options.
-- Translation languages: `RU`, `UA`, `EN`.
-- Full UI localization for `RU`, `UA`, `EN` (controls, quiz labels, status line, empty state).
-- Emoji-based top controls for auto-speech toggle and full verbs list modal.
-- Verbs list modal with dynamic CEFR level filters and sort toggle (infinitive/translation).
-- Independent dynamic CEFR level filters for Learn/Quiz cards and verbs list modal.
-- Level filter guards prevent turning off all levels (at least one level always stays selected).
-- Full-width segmented mode switch (`Learn` / `Quiz`) aligned with language switch style.
-- Per-card manual speak button in Learn mode (independent from auto-speech toggle).
-- Optional text-to-speech via Web Speech API (`de-DE`).
-- TTS speaks German forms and then translation in the active UI language (`RU`/`UA`/`EN`).
-- Auto-TTS in Learn mode triggers only when a new card is shown and never from modal filter interactions.
-- Centralized state transitions via `dispatch(action)`.
-- Accessibility improvements (`aria-pressed` toggles, non-color quiz feedback markers).
-- Installable PWA with app manifest and service worker.
-- Offline support with cached app shell and runtime caching.
-- Automatic update activation for newly installed service worker versions.
-- Explicit app version shown in the bottom status line.
-- No external runtime dependencies in the browser.
+- Mobile-friendly UI with large text and large buttons for comfortable on-the-go practice.
+- Interface and translations are available in `RU`, `UA`, and `EN`.
+- Full verbs list in a modal window with sorting and level-based filtering.
+- Level-based filtering is available both in training and in quiz modes.
+- Text-to-speech pronunciation for verb forms and translation.
+- Manual card speech playback and optional automatic speech in Learn mode.
+- Installable PWA with offline support.
+
+## Implementation Notes
+
+- Top controls use icon-only buttons.
+- Verbs list and card-level filters are maintained as separate filter states.
+- Level filter logic prevents an empty selection (at least one level always active).
+- Auto-TTS in Learn mode runs only when a new card is shown.
+- TTS is implemented through Web Speech API (`de-DE` + active UI language for translation).
+- State transitions are centralized via `dispatch(action)`.
+- Accessibility uses `aria-pressed` toggles and text markers in quiz feedback.
+- Service worker update flow uses immediate activation (`SKIP_WAITING`) and reload on controller change.
+- Browser app runtime has no external dependencies.
+- Current app version is shown in the bottom status line.
 
 ## Tech Stack
 
@@ -157,6 +159,49 @@ keep one record with the lowest `Level`, remove all others.
 merge `RU/UA/EN` translations into the kept record.
 4. Same `Infinitiv` with different grammar variants:
 keep variants, but mark them explicitly with `Variant` or `Note`.
+
+## `src/data/verbs.js` Purpose and Structure
+
+`src/data/verbs.js` is the single runtime dataset source for the browser app.
+It exposes records via `window.VERBS = [...]` so the app can load verbs without extra network requests.
+
+Primary responsibilities:
+
+- store all irregular verb entries used by Learn/Quiz/Modal views;
+- keep CEFR level and translation data in one place;
+- provide stable `id` values for deterministic behavior and validation.
+
+Current file format (raw source shape):
+
+- top-level: JavaScript array assigned to `window.VERBS`;
+- one object per verb record;
+- legacy field names are preserved in the dataset:
+  - identity and level: `id`, `Level`;
+  - verb forms: `Infinitiv`, `Praesens3`, `Praeteritum`, `Partizip2`, `AuxVerb`;
+  - vowel-change markers: `InfChar`, `P3Char`, `PraetChar`, `P2Char`;
+  - translations: `RU`, `UA`, `EN`;
+  - optional metadata: `Variant`, `Note`.
+
+Example record:
+
+```js
+{
+  id: "sehen-sah-gesehen",
+  Level: "A1",
+  Infinitiv: "sehen",
+  Praesens3: "sieht",
+  Praeteritum: "sah",
+  Partizip2: "gesehen",
+  AuxVerb: "haben",
+  RU: "видеть",
+  UA: "бачити",
+  EN: "see"
+}
+```
+
+At runtime and in validation, this raw shape is normalized by `src/data/verb-schema.js`
+into the canonical model (`level`, `infinitive`, `present3`, `preterite`, `participle2`, `auxiliary`, `translations`, etc.).
+This allows the source file to stay backward-compatible while the app logic uses a strict internal schema.
 
 ## Data Validation
 
