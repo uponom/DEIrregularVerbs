@@ -76,13 +76,6 @@ export function renderLearn(main, params) {
     wrap.appendChild(createElement('h3', 'child-list-title', labels.parentChildren.title));
 
     const table = createElement('table', 'child-table');
-    const head = createElement('thead', 'child-table-head');
-    const headRow = createElement('tr', '');
-    headRow.appendChild(createElement('th', 'child-col-inf', labels.parentChildren.infinitive));
-    headRow.appendChild(createElement('th', 'child-col-tr', labels.parentChildren.translation));
-    head.appendChild(headRow);
-    table.appendChild(head);
-
     const body = createElement('tbody', '');
     rows.forEach((row) => {
       const tr = createElement('tr', 'child-table-row');

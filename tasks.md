@@ -151,3 +151,9 @@
 - [x] 15.8 Add/update tests for state transitions and shell hooks.
 - [x] 15.9 Run full tests, data validation, and UI smoke via Chrome DevTools MCP.
 - [x] 15.10 Update README to reflect final behavior.
+
+## 16) Controls and Child Table Fine-Tuning
+- [x] 16.1 Hide child table header row in Parent-Children Learn view.
+- [x] 16.2 Restrict black/gray color scheme only to controls above the card.
+- [x] 16.3 Keep card and modal buttons on default styling.
+- [x] 16.4 Set white borders for top control buttons.

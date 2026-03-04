@@ -19,6 +19,7 @@ A single-page Progressive Web App (PWA) for learning German irregular verbs.
 ## Implementation Notes
 
 - Top controls use icon-only buttons.
+- Dark theme (`black` inactive / `gray` active with white borders) is applied only to controls above the card.
 - Verbs list and card-level filters are maintained as separate filter states.
 - Parent-Children mode is implemented as an additional cards-flow filter toggle.
 - Parent-Children toggle is placed in the level-filter row; modal has its own Parent-Children filter toggle.
