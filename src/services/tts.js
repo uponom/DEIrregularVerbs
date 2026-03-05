@@ -1,4 +1,4 @@
-const TTS_RATE = 0.95;
+const TTS_RATE = 1.0;
 const TTS_PITCH = 1.0;
 
 export function createTtsService() {

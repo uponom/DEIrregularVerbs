@@ -25,10 +25,11 @@ A single-page Progressive Web App (PWA) for learning German irregular verbs.
 - Parent-Children toggle is placed in the level-filter row; modal has its own Parent-Children filter toggle.
 - Level filter logic prevents an empty selection (at least one level always active).
 - Child verbs are linked through `Parent` (`child.Parent = parent.id`) and shown in Learn mode under the current parent card.
+- For parent detection, reflexive marker `sich` is ignored (for example `sich entschließen` -> `schließen`).
 - In modal Parent-Children mode, parent rows can be expanded to show child verbs inline.
 - Modal list keeps scroll position while expanding/collapsing parent rows.
 - Auto-TTS in Learn mode runs only when a new card is shown.
-- TTS is implemented through Web Speech API (`de-DE` + active UI language for translation).
+- TTS is implemented through Web Speech API (`de-DE` + active UI language for translation), default rate `1.0`.
 - State transitions are centralized via `dispatch(action)`.
 - Accessibility uses `aria-pressed` toggles and text markers in quiz feedback.
 - Service worker update flow uses immediate activation (`SKIP_WAITING`) and reload on controller change.
