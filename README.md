@@ -25,7 +25,7 @@ A single-page Progressive Web App (PWA) for learning German irregular verbs.
 - Parent-Children mode is implemented as an additional cards-flow filter toggle.
 - Parent-Children and Learn alphabetical toggles are placed in the level-filter row; modal has its own Parent-Children filter toggle.
 - Learn mode uses alphabetical order by default; the first letter is calculated from the infinitive without leading `sich`.
-- Alphabet quick-jump letters in Learn mode are generated dynamically from the currently filtered cards.
+- Alphabet quick-jump letters in Learn mode are generated dynamically from the currently filtered cards and rendered as a compact full-width letters row.
 - Level filter logic prevents an empty selection (at least one level always active).
 - Child verbs are linked through `Parent` (`child.Parent = parent.id`) and shown in Learn mode under the current parent card.
 - For parent detection, reflexive marker `sich` is ignored (for example `sich entschließen` -> `schließen`).

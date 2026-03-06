@@ -74,8 +74,35 @@
   .child-table { width: 100%; border-collapse: collapse; }
   .child-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 20px; }
   .child-cell-inf { font-weight: 700; }
-  .learn-alpha-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-  .learn-alpha-btn { min-width: 44px; padding: 8px 10px; }
+  .learn-alpha-nav {
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 0 2px;
+  }
+  .learn-alpha-letter {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: #4b5563;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 1px;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+  .learn-alpha-letter.active {
+    color: #111;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
 
   /* Learn mode */
   .flash-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }

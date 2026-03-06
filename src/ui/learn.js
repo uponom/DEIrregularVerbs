@@ -5,6 +5,18 @@ function createElement(tag, className, text) {
   return element;
 }
 
+function createAlphabetNav(alphabetLetters, activeLetter, onLetterJump) {
+  const alphabetNav = createElement('section', 'learn-alpha-nav');
+  (Array.isArray(alphabetLetters) ? alphabetLetters : []).forEach((letter) => {
+    const button = createElement('button', `learn-alpha-letter${letter === activeLetter ? ' active' : ''}`, letter);
+    button.type = 'button';
+    button.setAttribute('aria-label', letter);
+    button.onclick = () => onLetterJump(letter);
+    alphabetNav.appendChild(button);
+  });
+  return alphabetNav;
+}
+
 export function renderLearn(main, params) {
   const {
     item,
@@ -86,16 +98,7 @@ export function renderLearn(main, params) {
         return;
       }
 
-      const alphabetNav = createElement('section', 'learn-alpha-nav');
-      (Array.isArray(alphabetLetters) ? alphabetLetters : []).forEach((letter) => {
-        const button = createElement('button', `btn learn-alpha-btn${letter === activeLetter ? ' active' : ''}`, letter);
-        button.type = 'button';
-        button.setAttribute('aria-label', letter);
-        button.onclick = () => onLetterJump(letter);
-        alphabetNav.appendChild(button);
-      });
-
-      main.replaceChildren(card, alphabetNav);
+      main.replaceChildren(card, createAlphabetNav(alphabetLetters, activeLetter, onLetterJump));
       return;
     }
 
@@ -121,16 +124,7 @@ export function renderLearn(main, params) {
     return;
   }
 
-  const alphabetNav = createElement('section', 'learn-alpha-nav');
-  (Array.isArray(alphabetLetters) ? alphabetLetters : []).forEach((letter) => {
-    const button = createElement('button', `btn learn-alpha-btn${letter === activeLetter ? ' active' : ''}`, letter);
-    button.type = 'button';
-    button.setAttribute('aria-label', letter);
-    button.onclick = () => onLetterJump(letter);
-    alphabetNav.appendChild(button);
-  });
-
-  main.replaceChildren(card, alphabetNav);
+  main.replaceChildren(card, createAlphabetNav(alphabetLetters, activeLetter, onLetterJump));
 }
 
 export function renderEmptyState(main, labels) {
