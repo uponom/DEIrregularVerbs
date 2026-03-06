@@ -1,7 +1,7 @@
 (function (global) {
   'use strict';
 
-  const APP_VERSION = '24';
+  const APP_VERSION = '25';
 
   function getAppVersion() {
     return APP_VERSION;
