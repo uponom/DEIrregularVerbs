@@ -31,6 +31,7 @@ const levelFilters = document.getElementById('levelFilters');
 const modeLearnButton = document.getElementById('modeLearn');
 const modeQuizButton = document.getElementById('modeQuiz');
 const parentOnlyButton = document.getElementById('parentOnlyBtn');
+const learnAlphaButton = document.getElementById('learnAlphaBtn');
 const ttsToggleButton = document.getElementById('ttsToggleBtn');
 const openVerbsButton = document.getElementById('openVerbsBtn');
 const verbsModalRoot = document.getElementById('verbsModalRoot');
@@ -54,7 +55,11 @@ function getSelectedModalLevels(state) {
 
 function getMainFilteredItems(state) {
   const byLevel = VERBS_LIST.filterByLevels(ITEMS, state.selectedMainLevels, AVAILABLE_LEVELS);
-  return filterByParentOnly(byLevel, state.parentOnly);
+  const byParent = filterByParentOnly(byLevel, state.parentOnly);
+  if (state.mode === 'learn' && state.learnAlphabetical) {
+    return sortLearnItemsAlphabetically(byParent);
+  }
+  return byParent;
 }
 
 function getModalFilteredItems(state) {
@@ -99,6 +104,47 @@ function getSpeakSegments(item, uiLang) {
   ];
 }
 
+function normalizeInfinitiveForLearnSort(value) {
+  return String(value || '')
+    .trim()
+    .toLocaleLowerCase('de')
+    .replace(/^sich\s+/i, '');
+}
+
+function sortLearnItemsAlphabetically(items) {
+  return items.slice().sort((a, b) => {
+    const left = normalizeInfinitiveForLearnSort(a.de);
+    const right = normalizeInfinitiveForLearnSort(b.de);
+    const diff = left.localeCompare(right, 'de', { sensitivity: 'base' });
+    if (diff !== 0) return diff;
+    const deDiff = String(a.de || '').localeCompare(String(b.de || ''), 'de', { sensitivity: 'base' });
+    if (deDiff !== 0) return deDiff;
+    return String(a.id || '').localeCompare(String(b.id || ''), 'de', { sensitivity: 'base' });
+  });
+}
+
+function getLearnLetter(value) {
+  const normalized = normalizeInfinitiveForLearnSort(value);
+  if (!normalized) return '';
+  return normalized.charAt(0).toLocaleUpperCase('de');
+}
+
+function getLearnAlphabetLetters(items) {
+  const seen = new Set();
+  const letters = [];
+  items.forEach((item) => {
+    const letter = getLearnLetter(item.de);
+    if (!letter || seen.has(letter)) return;
+    seen.add(letter);
+    letters.push(letter);
+  });
+  return letters;
+}
+
+function findLearnIndexByLetter(items, letter) {
+  return items.findIndex((item) => getLearnLetter(item.de) === letter);
+}
+
 function renderControls() {
   const state = getState();
   const labels = getLabels();
@@ -117,6 +163,11 @@ function renderControls() {
   parentOnlyButton.title = state.parentOnly ? labels.controls.parentOnlyOnAria : labels.controls.parentOnlyOffAria;
   parentOnlyButton.setAttribute('aria-label', parentOnlyButton.title);
   setPressed(parentOnlyButton, state.parentOnly);
+
+  learnAlphaButton.textContent = '🔤';
+  learnAlphaButton.title = state.learnAlphabetical ? labels.controls.learnAlphaOnAria : labels.controls.learnAlphaOffAria;
+  learnAlphaButton.setAttribute('aria-label', learnAlphaButton.title);
+  setPressed(learnAlphaButton, state.learnAlphabetical);
 
   openVerbsButton.title = labels.controls.openListAria;
   openVerbsButton.setAttribute('aria-label', labels.controls.openListAria);
@@ -225,6 +276,8 @@ function renderApp() {
 
   if (state.mode === 'learn') {
     const childRows = state.parentOnly ? createChildRows(CHILDREN_MAP, item.id, state.uiLang) : [];
+    const alphabetLetters = state.learnAlphabetical ? getLearnAlphabetLetters(filteredItems) : [];
+    const activeLetter = state.learnAlphabetical ? getLearnLetter(item.de) : '';
     renderLearn(main, {
       item,
       translation: translate(item, state.uiLang),
@@ -232,7 +285,15 @@ function renderApp() {
       fallback: labels.fallback,
       childRows,
       showParentChildren: state.parentOnly,
+      showAlphabetNav: state.learnAlphabetical,
+      alphabetLetters,
+      activeLetter,
       onNext: () => dispatch({ type: ACTIONS.NEXT_ITEM }),
+      onLetterJump: (letter) => {
+        const targetIndex = findLearnIndexByLetter(filteredItems, letter);
+        if (targetIndex < 0) return;
+        dispatch({ type: ACTIONS.SET_INDEX, value: targetIndex });
+      },
       onSpeakCard: () => {
         ttsService.speakSegments(getSpeakSegments(item, state.uiLang), state.tts, { force: true });
       },
@@ -294,6 +355,7 @@ modeQuizButton.onclick = () => {
   dispatch({ type: ACTIONS.SET_MODE, value: 'quiz' });
 };
 parentOnlyButton.onclick = () => dispatch({ type: ACTIONS.TOGGLE_PARENT_ONLY });
+learnAlphaButton.onclick = () => dispatch({ type: ACTIONS.TOGGLE_LEARN_ALPHABETICAL });
 ttsToggleButton.onclick = () => dispatch({ type: ACTIONS.TOGGLE_TTS });
 openVerbsButton.onclick = () => dispatch({ type: ACTIONS.OPEN_VERBS_MODAL });
 

@@ -1,10 +1,12 @@
 export const ACTIONS = {
   NEXT_ITEM: 'NEXT_ITEM',
   NEXT_ITEM_AND_RESET_QUIZ: 'NEXT_ITEM_AND_RESET_QUIZ',
+  SET_INDEX: 'SET_INDEX',
   SET_MODE: 'SET_MODE',
   SET_UI_LANG: 'SET_UI_LANG',
   SET_TTS: 'SET_TTS',
   TOGGLE_TTS: 'TOGGLE_TTS',
+  TOGGLE_LEARN_ALPHABETICAL: 'TOGGLE_LEARN_ALPHABETICAL',
   OPEN_VERBS_MODAL: 'OPEN_VERBS_MODAL',
   CLOSE_VERBS_MODAL: 'CLOSE_VERBS_MODAL',
   TOGGLE_VERBS_SORT: 'TOGGLE_VERBS_SORT',
@@ -30,6 +32,7 @@ export function createInitialState() {
     uiLang: 'RU',
     tts: false,
     index: 0,
+    learnAlphabetical: true,
     q: createQuizProgress(),
     verbsModalOpen: false,
     verbsSortMode: 'infinitive',
@@ -129,6 +132,16 @@ export function reduceState(state, action, context) {
         index: (currentState.index + 1) % itemsLength,
         q: createQuizProgress(),
       };
+    case ACTIONS.SET_INDEX: {
+      if (!itemsLength) return { ...currentState, index: 0 };
+      const requested = Number(action.value);
+      if (!Number.isInteger(requested)) return currentState;
+      const normalized = ((requested % itemsLength) + itemsLength) % itemsLength;
+      return {
+        ...currentState,
+        index: normalized,
+      };
+    }
     case ACTIONS.SET_MODE:
       return {
         ...currentState,
@@ -149,6 +162,11 @@ export function reduceState(state, action, context) {
       return {
         ...currentState,
         tts: !currentState.tts,
+      };
+    case ACTIONS.TOGGLE_LEARN_ALPHABETICAL:
+      return {
+        ...currentState,
+        learnAlphabetical: !currentState.learnAlphabetical,
       };
     case ACTIONS.OPEN_VERBS_MODAL:
       return {

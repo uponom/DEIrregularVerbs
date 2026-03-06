@@ -64,6 +64,27 @@ test('parent-only mode toggles in reducer', () => {
   assert.equal(state.parentOnly, false);
 });
 
+test('learn alphabetical mode is enabled by default and toggles in reducer', () => {
+  let state = createInitialState();
+  assert.equal(state.learnAlphabetical, true);
+  state = reduceState(state, { type: ACTIONS.TOGGLE_LEARN_ALPHABETICAL }, CONTEXT);
+  assert.equal(state.learnAlphabetical, false);
+  state = reduceState(state, { type: ACTIONS.TOGGLE_LEARN_ALPHABETICAL }, CONTEXT);
+  assert.equal(state.learnAlphabetical, true);
+});
+
+test('set index normalizes requested index by available items length', () => {
+  let state = createInitialState();
+  state = reduceState(state, { type: ACTIONS.SET_INDEX, value: 5 }, { levels: CONTEXT.levels, itemsLength: 4 });
+  assert.equal(state.index, 1);
+
+  state = reduceState(state, { type: ACTIONS.SET_INDEX, value: -1 }, { levels: CONTEXT.levels, itemsLength: 4 });
+  assert.equal(state.index, 3);
+
+  state = reduceState(state, { type: ACTIONS.SET_INDEX, value: 'x' }, { levels: CONTEXT.levels, itemsLength: 4 });
+  assert.equal(state.index, 3);
+});
+
 test('modal parent-only mode toggles and resets expanded row', () => {
   let state = createInitialState();
   assert.equal(state.modalParentOnly, false);

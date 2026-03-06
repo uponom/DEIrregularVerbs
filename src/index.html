@@ -46,7 +46,7 @@
   .level-filters { display: flex; flex-wrap: wrap; gap: 8px; }
   .level-row { display: flex; gap: 8px; align-items: center; }
   .level-row .level-filters { flex: 1; }
-  .level-row #parentOnlyBtn { margin-left: auto; }
+  .level-row-actions { margin-left: auto; display: flex; gap: 8px; }
   .btn { padding: 10px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--inactive); color: var(--text); cursor: pointer; font-weight: 600; }
   .btn.active { background: var(--primary); }
   .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
@@ -74,6 +74,8 @@
   .child-table { width: 100%; border-collapse: collapse; }
   .child-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 20px; }
   .child-cell-inf { font-weight: 700; }
+  .learn-alpha-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .learn-alpha-btn { min-width: 44px; padding: 8px 10px; }
 
   /* Learn mode */
   .flash-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
@@ -224,7 +226,10 @@
     </div>
     <div class="level-row">
       <div id="levelFilters" class="level-filters" role="group" aria-label="Level filters"></div>
-      <button type="button" id="parentOnlyBtn" class="btn icon-btn" aria-label="Toggle Parent-Children mode" title="Toggle Parent-Children mode">🌱</button>
+      <div class="level-row-actions">
+        <button type="button" id="learnAlphaBtn" class="btn icon-btn" aria-label="Toggle alphabetical order in Learn mode" title="Toggle alphabetical order in Learn mode">🔤</button>
+        <button type="button" id="parentOnlyBtn" class="btn icon-btn" aria-label="Toggle Parent-Children mode" title="Toggle Parent-Children mode">🌱</button>
+      </div>
     </div>
     <div id="modeGroup" class="segmented segmented-wide" role="group" aria-label="Mode">
       <button type="button" id="modeLearn" class="active">Learn</button>

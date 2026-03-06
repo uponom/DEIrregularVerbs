@@ -13,6 +13,7 @@ test('app shell contains required mount points and scripts for initialization', 
   assert.match(html, /id="modeLearn"/);
   assert.match(html, /id="modeQuiz"/);
   assert.match(html, /id="parentOnlyBtn"/);
+  assert.match(html, /id="learnAlphaBtn"/);
   assert.match(html, /id="ttsToggleBtn"/);
   assert.match(html, /id="openVerbsBtn"/);
   assert.match(html, /class="level-row"/);

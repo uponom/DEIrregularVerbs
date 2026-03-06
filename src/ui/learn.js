@@ -6,7 +6,20 @@ function createElement(tag, className, text) {
 }
 
 export function renderLearn(main, params) {
-  const { item, translation, labels, fallback, onNext, onSpeakCard, childRows, showParentChildren } = params;
+  const {
+    item,
+    translation,
+    labels,
+    fallback,
+    onNext,
+    onSpeakCard,
+    childRows,
+    showParentChildren,
+    showAlphabetNav,
+    alphabetLetters,
+    activeLetter,
+    onLetterJump,
+  } = params;
 
   const card = createElement('section', 'card');
   const flash = createElement('div', 'flash-grid');
@@ -68,7 +81,21 @@ export function renderLearn(main, params) {
   if (showParentChildren) {
     const rows = Array.isArray(childRows) ? childRows : [];
     if (!rows.length) {
-      main.replaceChildren(card);
+      if (!showAlphabetNav) {
+        main.replaceChildren(card);
+        return;
+      }
+
+      const alphabetNav = createElement('section', 'learn-alpha-nav');
+      (Array.isArray(alphabetLetters) ? alphabetLetters : []).forEach((letter) => {
+        const button = createElement('button', `btn learn-alpha-btn${letter === activeLetter ? ' active' : ''}`, letter);
+        button.type = 'button';
+        button.setAttribute('aria-label', letter);
+        button.onclick = () => onLetterJump(letter);
+        alphabetNav.appendChild(button);
+      });
+
+      main.replaceChildren(card, alphabetNav);
       return;
     }
 
@@ -89,7 +116,21 @@ export function renderLearn(main, params) {
     card.appendChild(wrap);
   }
 
-  main.replaceChildren(card);
+  if (!showAlphabetNav) {
+    main.replaceChildren(card);
+    return;
+  }
+
+  const alphabetNav = createElement('section', 'learn-alpha-nav');
+  (Array.isArray(alphabetLetters) ? alphabetLetters : []).forEach((letter) => {
+    const button = createElement('button', `btn learn-alpha-btn${letter === activeLetter ? ' active' : ''}`, letter);
+    button.type = 'button';
+    button.setAttribute('aria-label', letter);
+    button.onclick = () => onLetterJump(letter);
+    alphabetNav.appendChild(button);
+  });
+
+  main.replaceChildren(card, alphabetNav);
 }
 
 export function renderEmptyState(main, labels) {
